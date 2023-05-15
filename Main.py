@@ -16,13 +16,17 @@ class GameState:
         self.obstacles = [Obstacle(ob.x_location, ob.y_location, ob.passable) for ob in self.game_map.get_objects('obstacle')]
 
     def assign_players(self):
-        for p, b in zip(self.players, self.player_bases):
-            p.x_pos = b.x_location
-            p.y_pos = b.y_location
-            b.player = f'{p.name}_base'
+        for player, base in zip(self.players, self.player_bases):
+            player.x_pos = base.x_location
+            player.y_pos = base.y_location
+            base.player = f'{player.name}_base'
+        test = 'stop'
 
     def update_state(self, activity_frame):
         current_positions = self.get_positional()
+        for player, activity in activity_frame.items():
+            active_player = [pl for pl in self.players if pl.name == player][0]
+            self.move_target(direction = activity, player = active_player)
 
 
     def get_positional(self):

@@ -29,20 +29,23 @@ class Map:
         '''
         if debug:
             self.map_array[2][2] = MapObject('obstacle')
-            self.map_array[1][1] = \
-            self.map_array[1][3] = \
-            self.map_array[3][1] = \
+            self.map_array[1][1] = MapObject('player_base')
+            self.map_array[1][3] = MapObject('player_base')
+            self.map_array[3][1] = MapObject('player_base')
             self.map_array[3][3] = MapObject('player_base')
-            self.map_array[2][1] = \
+            self.map_array[2][1] = MapObject('mine')
             self.map_array[2][3] = MapObject('mine')
+
+            for x in range(4):
+                for y in range(4):
+                    target_object = self.map_array[x][y]
+                    target_object.update_location(x,y)
+                    print(f"x:{x} , y:{y} object :{target_object.coords}, type: {target_object.name}")
             return
         blocking_object_count = math.ceil(self.size/2)
-        self.set_positions(MapObject('obstacle'), blocking_object_count)
-        for p in range(players):
-            player_map_object = MapObject('player_base')
-            player_map_object.symbol = 'b'
-            self.set_positions(player_map_object, 1)
-        self.set_positions(MapObject('mine'), blocking_object_count)
+        self.create_map_object('obstacle', blocking_object_count)
+        self.create_map_object('player_base', players)
+        self.create_map_object('mine', blocking_object_count)
 
     def get_objects(self,object_type):
         found_objects = []
@@ -53,7 +56,7 @@ class Map:
     def get_object(self, x, y):
         return self.map_array[x][y]
 
-    def set_positions(self, map_object, number):
+    def create_map_object(self, map_object_type, number):
         '''
         Function to add objects to the map
         :param type: list of object types
@@ -61,12 +64,14 @@ class Map:
         :return:
         '''
         for element in range(number):
+            map_object = MapObject(map_object_type)
             while True:
                 rand_x = random.randint(0,self.size - 1)
                 rand_y = random.randint(0,self.size - 1)
                 map_location = self.map_array[rand_x][rand_y]
                 if map_location.type == 'empty':
                     self.map_array[rand_x][rand_y] = map_object
+                    map_object.update_location(rand_x, rand_y)
                     break
 
 
@@ -95,5 +100,12 @@ class MapObject:
             self.symbol = self.name
             self.resource = 0
             self.passable = False
+            self.symbol = 'b'
+
+
+    def update_location(self, x, y):
+        self.x_location = x
+        self.y_location = y
+        self.coords =  [x,y]
 
 

@@ -18,8 +18,10 @@ class MyTestCase(unittest.TestCase):
         map.set_objects(players=4, debug=False)
         #there are half the number of one dimension as a non movable tile and the locations are not colliding
         self.assertEqual(self.count_specific_objects(map.map_array,['o']), 2, "Failed to get blocking objects")
+        blocking_objects = map.get_objects('obstacle')
+        self.assertNotEqual(blocking_objects[0].coords, blocking_objects[1].coords, "the blocking objects are glued together")
         #there are 4 player spawn points
-        self.assertEqual(self.count_specific_objects(map.map_array,['b']),4, "Failed to get player objects")
+        self.assertEqual(self.count_specific_objects(map.map_array,['b']),4, "Failed to get player base objects")
         #there are half the number of one dimension as gold mine locations
         self.assertEqual(self.count_specific_objects(map.map_array,['m']),2, "Failed to get mine objects")
         self.assertEqual(len(map.get_objects('player_base')),4, "Failed to find the correct number of player bases")
