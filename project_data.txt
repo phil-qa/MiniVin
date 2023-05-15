@@ -1,0 +1,22 @@
+MniVin
+
+python based turn based game for code competitions
+
+Requirements
+Server (flask)
+    setup a play space with assets
+        configured map size with assets
+            gold mine
+                integer number of coins before empty
+            bases
+                one per player
+            obsticles
+                cannot be traversed
+
+    to take code from clients
+    start a execution cycle
+        read in the state
+        read in the client code actions
+        perform activities on the target
+        update the state
+    send out situational data
