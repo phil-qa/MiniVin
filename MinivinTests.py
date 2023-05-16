@@ -79,9 +79,9 @@ class MyTestCase(unittest.TestCase):
         then the gamestate understands the response on target
          01234
         0*****
-        1*a*b*
+        1*a*c*
         2*m.**
-        3*c***
+        3*b***
         4*****
         '''
         game_state = GameState(debug=True)
@@ -91,10 +91,45 @@ class MyTestCase(unittest.TestCase):
         cathy = game_state.players[2]
 
         starting_positions = game_state.players.copy()
-        #players move on update
-        game_state.update_state({f'{amy.name}' : 'e', f'{bob.name}' : 'n', f'{cathy.name}': 's'})
-        self.assertEqual([amy.x_pos, amy.y_pos], [2,1], "Amy isnt in the right place")
 
+        self.assertEqual([1, 1], [amy.x_pos, amy.y_pos], "Amy isnt in the right start point")
+        self.assertEqual([1, 3], [bob.x_pos, bob.y_pos], "bob inst in the right start point")
+        self.assertEqual([3, 1], [cathy.x_pos, cathy.y_pos], "cathy isnt in the right start point ")
+        # players move on update
+
+        game_state.update_state({f'{amy.name}': 'e', f'{bob.name}': 'w', f'{cathy.name}': 's'})
+
+        self.assertEqual([2, 1], [amy.x_pos, amy.y_pos], "Amy isnt in the right place")
+        self.assertEqual([0, 3], [bob.x_pos, bob.y_pos], "Bob isnt in the right place")
+        self.assertEqual([3, 2], [cathy.x_pos, cathy.y_pos], "Cathy isnt in the right place")
+
+        # players cant go over the map edges
+
+        game_state.update_state({f'{amy.name}': 'n', f'{bob.name}': 'w', f'{cathy.name}': 'e'})
+
+        self.assertEqual([2, 0], [amy.x_pos, amy.y_pos], "Amy isnt in the right place")
+        self.assertEqual([0, 3], [bob.x_pos, bob.y_pos], "Bob isnt in the right place")
+        self.assertEqual([4, 2], [cathy.x_pos, cathy.y_pos], "Cathy isnt in the right place")
+
+        game_state.update_state({f'{amy.name}': 'n', f'{bob.name}': 's', f'{cathy.name}': 'e'})
+
+        self.assertEqual([2, 0], [amy.x_pos, amy.y_pos], "Amy isnt in the right place")
+        self.assertEqual([0, 4], [bob.x_pos, bob.y_pos], "Bob isnt in the right place")
+        self.assertEqual([4, 2], [cathy.x_pos, cathy.y_pos], "Cathy isnt in the right place")
+
+        # players cant go onto an obstacle at [2,2]
+
+        game_state.update_state({f'{amy.name}': 's', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
+
+        self.assertEqual([2, 1], [amy.x_pos, amy.y_pos], "Amy isnt in the right place")
+        self.assertEqual([0, 4], [bob.x_pos, bob.y_pos], "Bob isnt in the right place")
+        self.assertEqual([4, 2], [cathy.x_pos, cathy.y_pos], "Cathy isnt in the right place")
+
+        game_state.update_state({f'{amy.name}': 's', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
+
+        self.assertEqual([2, 1], [amy.x_pos, amy.y_pos], "Amy isnt in the right place")
+        self.assertEqual([0, 4], [bob.x_pos, bob.y_pos], "Bob isnt in the right place")
+        self.assertEqual([4, 2], [cathy.x_pos, cathy.y_pos], "Cathy isnt in the right place")
 
 
 
