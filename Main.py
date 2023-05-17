@@ -13,7 +13,7 @@ class GameState:
         self.players = [Player(pl) for pl in players]
         self.player_bases = [PlayerBase(ba.x_location, ba.y_location) for ba in self.game_map.get_objects('player_base')]
         self.assign_players()
-        self.mines = [Mine(min.x_location, min.y_location, min.resource) for min in self.game_map.get_objects('mine')]
+        self.mines = [Mine(min.x_location, min.y_location, name = min.name) for  min in self.game_map.get_objects('mine')]
         self.obstacles = [Obstacle(ob.x_location, ob.y_location, ob.passable) for ob in self.game_map.get_objects('obstacle')]
 
     def assign_players(self):

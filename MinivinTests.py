@@ -6,6 +6,12 @@ from Player import Player
 from Main import GameState
 
 class MyTestCase(unittest.TestCase):
+    '''
+    Map tests
+    The map should initialise
+    The map objects shall be placed
+    The map class shall have a path tool
+    '''
     def test_map_initialises(self):
         map = Map(4)
         self.assertEqual(len(map.map_array), 4)  # add assertion here
@@ -33,6 +39,15 @@ class MyTestCase(unittest.TestCase):
         self.assertIsNotNone(single_object)
         self.assertEqual(single_object.x_location,0)
         self.assertEqual(single_object.y_location, 0)
+
+    def test_get_path(self):
+        game_state = GameState(debug = True)
+        amy = game_state.players[0]
+        bob = game_state.players[1]
+        cathy = game_state.players[2]
+        mine = game_state.mines[0]
+        path_amy_to_mine1 = game_state.game_map.get_path(amy, mine )
+        self.assertEqual(['s'], path_amy_to_mine1)
 
     '''
     player Tests 
