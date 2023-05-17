@@ -18,30 +18,35 @@ class GameState:
 
     def assign_players(self):
         for player, base in zip(self.players, self.player_bases):
-            player.x_pos = base.x_location
-            player.y_pos = base.y_location
+            player.set(base.x_location, base.y_location, 50)
             base.player = f'{player.name}_base'
         test = 'stop'
 
     def update_state(self, activity_frame):
         current_positions = self.get_positional()
+        obstacle_coords = [c.coords for c in self.obstacles]
+        mine_coords = [c.coords for c in self.mines]
+
         for player, activity in activity_frame.items():
             active_player = [pl for pl in self.players if pl.name == player][0]
             self.move_target(direction = activity, player = active_player)
             if active_player.x_pos < 0 or active_player.x_pos == self.map_size or active_player.y_pos <0 or active_player.y_pos == self.map_size:
                 self.player_revert(active_player, current_positions)
 
-
-            obstacles = [c.coords for c in self.game_map.get_objects('obstacle')]
-
-            if active_player.coords in obstacles:
-                print(f"player {active_player.name}, it obstacle at {[c for c in obstacles if c == active_player.coords]}")
+            if active_player.coords in obstacle_coords:
                 self.player_revert(active_player,current_positions)
+
+            if active_player.coords in mine_coords:
+                if active_player.resource < 5:
+                    active_player.resource += 1
+                self.player_revert(active_player, current_positions)
+
 
     def player_revert(self, player, original_positions):
         old_state = [pl for pl in original_positions if pl[0] == player.name][0]
         player.x_pos = old_state[1]
         player.y_pos = old_state[2]
+        player.coords = [player.x_pos, player.y_pos]
 
     def get_positional(self):
         return [[p.name, p.x_pos, p.y_pos] for p in self.players]

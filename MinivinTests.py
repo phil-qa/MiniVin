@@ -61,14 +61,30 @@ class MyTestCase(unittest.TestCase):
         and the state objects shall be created
         and the players shall be at their bases
 
+        given a move state
+        the players shall move according to the direction unless when the play7er attempts to move :
+        there is an obstacle, the player will remain at location
+        there is a mine, the player will mine a resource to a max of 5 times
+        there is a map edge, the player will remain at location
+        there is antother player base, the player will renmain at location
+        there is a player base, the player shall move to it and hand over resources and have moves refreshed
+
         '''
 
         game_state = GameState(players=['amy', 'bob', 'cath', 'don'], map_size=8)
         self.assertIsNotNone(game_state.game_map, "Map not initialised")
         self.assertEqual(len(game_state.players), 4, "Number of players incorrect")
+        for player in game_state.players:
+            self.assertIsNotNone(player.coords, f"player {player.name} has not got coordinates set")
         self.assertEqual(len(game_state.mines), 4, "Number of mines incorrect")
+        for mine in game_state.mines:
+            self.assertIsNotNone(mine.coords, f"a mine has no coordinates")
         self.assertEqual(len(game_state.obstacles), 4, "Number of obstacles incorrect")
+        for obstacle in game_state.obstacles:
+            self.assertIsNotNone(obstacle.coords)
         self.assertEqual(len(game_state.player_bases), 4, "Number of bases incorrect")
+        for base in game_state.player_bases:
+            self.assertIsNotNone(base.coords)
         self.assertEqual(game_state.players[0].x_pos, game_state.player_bases[0].x_location)
         self.assertEqual(game_state.players[0].y_pos, game_state.player_bases[0].y_location)
 
@@ -82,7 +98,7 @@ class MyTestCase(unittest.TestCase):
         1*a*c*
         2*m.**
         3*b***
-        4*****
+        4***m*
         '''
         game_state = GameState(debug=True)
         self.assertIsNotNone(game_state)
@@ -92,14 +108,14 @@ class MyTestCase(unittest.TestCase):
 
         starting_positions = game_state.players.copy()
 
-        self.assertEqual([1, 1], [amy.x_pos, amy.y_pos], "Amy isnt in the right start point")
-        self.assertEqual([1, 3], [bob.x_pos, bob.y_pos], "bob inst in the right start point")
-        self.assertEqual([3, 1], [cathy.x_pos, cathy.y_pos], "cathy isnt in the right start point ")
+        self.assertEqual([1, 1], amy.coords, "Amy isnt in the right start point")
+        self.assertEqual([1, 3], bob.coords, "bob inst in the right start point")
+        self.assertEqual([3, 1], cathy.coords, "cathy isnt in the right start point ")
         # players move on update
 
         game_state.update_state({f'{amy.name}': 'e', f'{bob.name}': 'w', f'{cathy.name}': 's'})
 
-        self.assertEqual([2, 1], [amy.x_pos, amy.y_pos], "Amy isnt in the right place")
+        self.assertEqual([2, 1], amy.coords, "Amy isnt in the right place")
         self.assertEqual([0, 3], [bob.x_pos, bob.y_pos], "Bob isnt in the right place")
         self.assertEqual([3, 2], [cathy.x_pos, cathy.y_pos], "Cathy isnt in the right place")
 
@@ -107,13 +123,13 @@ class MyTestCase(unittest.TestCase):
 
         game_state.update_state({f'{amy.name}': 'n', f'{bob.name}': 'w', f'{cathy.name}': 'e'})
 
-        self.assertEqual([2, 0], [amy.x_pos, amy.y_pos], "Amy isnt in the right place")
+        self.assertEqual([2, 0], amy.coords, "Amy isnt in the right place")
         self.assertEqual([0, 3], [bob.x_pos, bob.y_pos], "Bob isnt in the right place")
         self.assertEqual([4, 2], [cathy.x_pos, cathy.y_pos], "Cathy isnt in the right place")
 
         game_state.update_state({f'{amy.name}': 'n', f'{bob.name}': 's', f'{cathy.name}': 'e'})
 
-        self.assertEqual([2, 0], [amy.x_pos, amy.y_pos], "Amy isnt in the right place")
+        self.assertEqual([2, 0], amy.coords, "Amy isnt in the right place")
         self.assertEqual([0, 4], [bob.x_pos, bob.y_pos], "Bob isnt in the right place")
         self.assertEqual([4, 2], [cathy.x_pos, cathy.y_pos], "Cathy isnt in the right place")
 
@@ -130,6 +146,28 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual([2, 1], [amy.x_pos, amy.y_pos], "Amy isnt in the right place")
         self.assertEqual([0, 4], [bob.x_pos, bob.y_pos], "Bob isnt in the right place")
         self.assertEqual([4, 2], [cathy.x_pos, cathy.y_pos], "Cathy isnt in the right place")
+
+        # # player approaching a mine tile does not move
+
+        game_state.update_state({f'{amy.name}': 'w', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
+        game_state.update_state({f'{amy.name}': 's', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
+
+        self.assertEqual([1, 1], [amy.x_pos, amy.y_pos], "Amy isnt in the right place")
+        self.assertEqual([0, 4], [bob.x_pos, bob.y_pos], "Bob isnt in the right place")
+        self.assertEqual([4, 2], [cathy.x_pos, cathy.y_pos], "Cathy isnt in the right place")
+
+        # a player that has approached a mine tile has harvested one coin
+        self.assertEqual(1, amy.resource, "amy  didnt get a coin")
+
+        # a player can only mine five coins
+        game_state.update_state({f'{amy.name}': 's', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
+        game_state.update_state({f'{amy.name}': 's', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
+        game_state.update_state({f'{amy.name}': 's', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
+        game_state.update_state({f'{amy.name}': 's', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
+        game_state.update_state({f'{amy.name}': 's', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
+
+        self.assertEqual(5, amy.resource, "amys got an odd amount of coins")
+
 
 
 

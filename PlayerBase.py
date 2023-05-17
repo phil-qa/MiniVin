@@ -4,4 +4,5 @@ class PlayerBase:
         self.y_location = y_location
         self.resource = 0
         self.player = None
+        self.coords = [x_location, y_location]
 

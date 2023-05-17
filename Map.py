@@ -33,8 +33,8 @@ class Map:
             self.map_array[1][3] = MapObject('player_base')
             self.map_array[3][1] = MapObject('player_base')
             self.map_array[3][3] = MapObject('player_base')
-            self.map_array[2][1] = MapObject('mine')
-            self.map_array[2][3] = MapObject('mine')
+            self.map_array[1][2] = MapObject('mine')
+            self.map_array[3][3] = MapObject('mine')
 
             for x in range(4):
                 for y in range(4):
@@ -42,6 +42,8 @@ class Map:
                     target_object.update_location(x,y)
                     print(f"x:{x} , y:{y} object :{target_object.coords}, type: {target_object.name}")
             return
+
+
         blocking_object_count = math.ceil(self.size/2)
         self.create_map_object('obstacle', blocking_object_count)
         self.create_map_object('player_base', players)
