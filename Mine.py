@@ -4,5 +4,5 @@ class Mine:
         self.x_location = x_loc
         self.y_location = y_loc
         self.coords = [x_loc, y_loc]
-
+        self.tile = f'{x_loc}{y_loc}'
 

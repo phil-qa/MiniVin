@@ -1,15 +1,17 @@
 import math
 import random
-from collections import deque
+import networkx as nx
+
+import Pathing
 
 
 class Map:
     def __init__(self, size):
         self.map_array = []
         self.size = size
-        self.initialise_empty_map(size)
+        self._initialise_empty_map(size)
 
-    def initialise_empty_map(self, size):
+    def _initialise_empty_map(self, size):
         '''
         Function to initise the map,
         :param size: int x and y size, debug
@@ -57,8 +59,10 @@ class Map:
     def get_object(self, x, y):
         return self.map_array[x][y]
 
+
+
     def get_path(self, object_1, object_2):
-        return utility.find_path(self.map_array, object_1.coords, object_2.coords)
+        return Pathing.find_path(object_1.coords, object_2.coords, self)
 
     def create_map_object(self, map_object_type, number):
         '''
@@ -87,6 +91,7 @@ class MapObject:
         self.type = type
         self.x_location = x_location
         self.y_location = y_location
+        self.tile = f'{x_location}{y_location}'
         if type == 'empty':
             self.symbol = 0
             self.resource = 0
@@ -109,43 +114,4 @@ class MapObject:
         self.x_location = x
         self.y_location = y
         self.coords = [x, y]
-
-
-class utility:
-    @staticmethod
-    def find_path(map, start, end):
-        # possible directions
-        directions = [[0, 1], [1, 0], [0, -1], [-1, 0]]
-        # record of visited so that they are not re-visited
-        visited = set()
-        # build a path matrix
-        matrix = []
-        for y in range(len(map)):
-            row = []
-            for x in range(len(map)):
-                if map[y][x].passable == True:
-                    row.append(0)
-                else:
-                    row.append(1)
-
-        rows, columns = len(map), len(map)
-
-        queue = deque()
-
-        queue.append([0, 0, 0])  # row column and distance
-
-        # implement bfs
-        while len(queue) > 0:
-            current_row, current_column, current_distance = queue.popleft()
-            if current_row == rows - 1 and current_row == columns - 1:  # this is the end corner of the map
-                return current_distance
-
-            if matrix[current_row][current_column] == 1:
-                continue
-            #iterate through the directions
-            for direction in directions:
-                next_row, next_column = current_row + direction[0], current_column + direction[1]
-                if 0 <= next_row < rows and 0 <= next_column < columns and (next_row, next_column) not in visited:
-                    queue.append([next_row, next_column, current_distance +1])
-                    visited.add(((next_row, next_column)))
-        return -1
+        self.tile = f'{x}{y}'

@@ -10,12 +10,14 @@ class Player:
         self.target_y = None
         self.coords = None
         self.target_coords = None
+        self.tile = None
 
 
     def set(self,x_pos, y_pos, health):
         self.x_pos = x_pos
         self.y_pos = y_pos
         self.coords = [x_pos,y_pos]
+        self.tile = f'{x_pos}{y_pos}'
         self.max_health = self.health = health
 
     def set_target(self,x_pos, y_pos):
@@ -35,3 +37,4 @@ class Player:
         elif direction == 'h':
             return
         self.coords = [self.x_pos, self.y_pos]
+        self.tile = f'{self.x_pos}{self.y_pos}'

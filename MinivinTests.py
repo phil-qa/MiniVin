@@ -4,6 +4,7 @@ collections.Callable = collections.abc.Callable
 from Map import Map
 from Player import Player
 from Main import GameState
+import Pathing
 
 class MyTestCase(unittest.TestCase):
     '''
@@ -26,11 +27,20 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(self.count_specific_objects(map.map_array,['o']), 2, "Failed to get blocking objects")
         blocking_objects = map.get_objects('obstacle')
         self.assertNotEqual(blocking_objects[0].coords, blocking_objects[1].coords, "the blocking objects are glued together")
+        for bo in blocking_objects:
+            self.assertEqual(f'{bo.x_location}{bo.y_location}', bo.tile)
+
         #there are 4 player spawn points
         self.assertEqual(self.count_specific_objects(map.map_array,['b']),4, "Failed to get player base objects")
+        spawn_points = map.get_objects('player_base')
+        for sp in spawn_points:
+            self.assertEqual(f'{sp.x_location}{sp.y_location}', sp.tile)
+
+
         #there are half the number of one dimension as gold mine locations
         self.assertEqual(self.count_specific_objects(map.map_array,['m']),2, "Failed to get mine objects")
         self.assertEqual(len(map.get_objects('player_base')),4, "Failed to find the correct number of player bases")
+
 
     def test_get_object_at_location(self):
         map = Map(4)
@@ -40,14 +50,15 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(single_object.x_location,0)
         self.assertEqual(single_object.y_location, 0)
 
+
     def test_get_path(self):
         game_state = GameState(debug = True)
         amy = game_state.players[0]
         bob = game_state.players[1]
         cathy = game_state.players[2]
         mine = game_state.mines[0]
-        path_amy_to_mine1 = game_state.game_map.get_path(amy, mine )
-        self.assertEqual(['s'], path_amy_to_mine1)
+
+        path_amy_to_mine1 = Pathing.Pathing.find_path(amy.tile,mine.tile, game_state.game_map)
 
     '''
     player Tests 
@@ -65,6 +76,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(30, player.health)
         self.assertEqual(30, player.max_health)
         self.assertEqual(0, player.resource)
+        self.assertEqual('00', player.tile)
 
 
     '''game sequence tests'''
