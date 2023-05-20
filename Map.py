@@ -85,12 +85,13 @@ class Map:
                     break
 
 
+
 class MapObject:
     def __init__(self, type, instance, x_location=0, y_location=0):
         self.name = f'{type}{str(instance)}'
         self.type = type
-        self.x_location = x_location
-        self.y_location = y_location
+        self.x_position = x_location
+        self.y_position = y_location
         self.tile = f'{x_location}{y_location}'
         if type == 'empty':
             self.symbol = 0
@@ -111,7 +112,9 @@ class MapObject:
             self.symbol = 'b'
 
     def update_location(self, x, y):
-        self.x_location = x
-        self.y_location = y
+        self.x_position = x
+        self.y_position = y
         self.coords = [x, y]
         self.tile = f'{x}{y}'
+
+

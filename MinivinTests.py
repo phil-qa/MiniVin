@@ -4,7 +4,7 @@ collections.Callable = collections.abc.Callable
 from Map import Map
 from Player import Player
 from Main import GameState
-import Pathing
+from Pathing import Pathing
 
 class MyTestCase(unittest.TestCase):
     '''
@@ -23,22 +23,29 @@ class MyTestCase(unittest.TestCase):
 
         map = Map(4)
         map.set_objects(players=4, debug=False)
+        # tiles have been set correctly
+        for y_line in map.map_array:
+            for o in y_line:
+                self.assertEqual(f'{o.x_position}{o.y_position}', o.tile, f'the map object at {o.x_position}{o.y_position} is not correct' )
         #there are half the number of one dimension as a non movable tile and the locations are not colliding
         self.assertEqual(self.count_specific_objects(map.map_array,['o']), 2, "Failed to get blocking objects")
         blocking_objects = map.get_objects('obstacle')
         self.assertNotEqual(blocking_objects[0].coords, blocking_objects[1].coords, "the blocking objects are glued together")
         for bo in blocking_objects:
-            self.assertEqual(f'{bo.x_location}{bo.y_location}', bo.tile)
+            self.assertEqual(f'{bo.x_position}{bo.y_position}', bo.tile)
 
         #there are 4 player spawn points
         self.assertEqual(self.count_specific_objects(map.map_array,['b']),4, "Failed to get player base objects")
         spawn_points = map.get_objects('player_base')
         for sp in spawn_points:
-            self.assertEqual(f'{sp.x_location}{sp.y_location}', sp.tile)
+            self.assertEqual(f'{sp.x_position}{sp.y_position}', sp.tile)
 
 
         #there are half the number of one dimension as gold mine locations
         self.assertEqual(self.count_specific_objects(map.map_array,['m']),2, "Failed to get mine objects")
+        mines = map.get_objects('mine')
+        for mine in mines:
+            self.assertEqual(f'{mine.x_position}{mine.y_position}', mine.tile)
         self.assertEqual(len(map.get_objects('player_base')),4, "Failed to find the correct number of player bases")
 
 
@@ -47,9 +54,15 @@ class MyTestCase(unittest.TestCase):
         map.set_objects(players=4, debug=True)
         single_object = map.get_object(0,0)
         self.assertIsNotNone(single_object)
-        self.assertEqual(single_object.x_location,0)
-        self.assertEqual(single_object.y_location, 0)
+        self.assertEqual(single_object.x_position, 0)
+        self.assertEqual(single_object.y_position, 0)
 
+    def test_translate_tile_direction(self):
+        source_tile = '22'
+        self.assertEqual('n', Pathing.convert_tile_transisiton_to_direction(source_tile,'21'))
+        self.assertEqual('e', Pathing.convert_tile_transisiton_to_direction(source_tile, '32'))
+        self.assertEqual('s', Pathing.convert_tile_transisiton_to_direction(source_tile, '23'))
+        self.assertEqual('w', Pathing.convert_tile_transisiton_to_direction(source_tile, '12'))
 
     def test_get_path(self):
         game_state = GameState(debug = True)
@@ -58,7 +71,21 @@ class MyTestCase(unittest.TestCase):
         cathy = game_state.players[2]
         mine = game_state.mines[0]
 
-        path_amy_to_mine1 = Pathing.Pathing.find_path(amy.tile,mine.tile, game_state.game_map)
+        path_amy_to_mine1 = Pathing.find_path(amy.tile, mine.tile, game_state.game_map)
+        # path request is not null
+        self.assertIsNotNone(path_amy_to_mine1, 'No path objects returned from request amy to mine')
+        #path does not go over an impassble object
+        for tile in path_amy_to_mine1[1:-2]:
+            x = int(tile[0])
+            y = int(tile[1])
+            object_at_location = game_state.game_map.get_object(x,y)
+            self.assertEqual(True, object_at_location.passable, f"stepped on a non passable square at {tile}")
+
+        # assert direction steps
+
+
+
+
 
     '''
     player Tests 
@@ -112,10 +139,10 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(len(game_state.player_bases), 4, "Number of bases incorrect")
         for base in game_state.player_bases:
             self.assertIsNotNone(base.coords)
-        self.assertEqual(game_state.players[0].x_pos, game_state.player_bases[0].x_location)
-        self.assertEqual(game_state.players[0].y_pos, game_state.player_bases[0].y_location)
+        self.assertEqual(game_state.players[0].x_pos, game_state.player_bases[0].x_position)
+        self.assertEqual(game_state.players[0].y_pos, game_state.player_bases[0].y_position)
 
-    def test_motion_events(self):
+    def test_game_state_events(self):
         '''
         given an initialised map
         when a player moves
@@ -136,16 +163,21 @@ class MyTestCase(unittest.TestCase):
         starting_positions = game_state.players.copy()
 
         self.assertEqual([1, 1], amy.coords, "Amy isnt in the right start point")
-        self.assertEqual([1, 3], bob.coords, "bob inst in the right start point")
+        self.assertEqual('11', amy.tile, "Tile for amy isnt right")
+        self.assertEqual([1, 3], bob.coords, "bob isnt in the right start point")
+        self.assertEqual('13', bob.tile, "Bobs tile is not at the right place")
         self.assertEqual([3, 1], cathy.coords, "cathy isnt in the right start point ")
+        self.assertEqual('31', cathy.tile, "Tile for cathy isnt right")
         # players move on update
 
         game_state.update_state({f'{amy.name}': 'e', f'{bob.name}': 'w', f'{cathy.name}': 's'})
 
         self.assertEqual([2, 1], amy.coords, "Amy isnt in the right place")
+        self.assertEqual('21', amy.tile, "Tile for amy isnt right")
         self.assertEqual([0, 3], [bob.x_pos, bob.y_pos], "Bob isnt in the right place")
+        self.assertEqual('03', bob.tile, "Tile for bob isnt right")
         self.assertEqual([3, 2], [cathy.x_pos, cathy.y_pos], "Cathy isnt in the right place")
-
+        self.assertEqual('32', cathy.tile, "Tile for cathy isnt right")
         # players cant go over the map edges
 
         game_state.update_state({f'{amy.name}': 'n', f'{bob.name}': 'w', f'{cathy.name}': 'e'})
@@ -179,7 +211,9 @@ class MyTestCase(unittest.TestCase):
         game_state.update_state({f'{amy.name}': 'w', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
         game_state.update_state({f'{amy.name}': 's', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
 
+
         self.assertEqual([1, 1], [amy.x_pos, amy.y_pos], "Amy isnt in the right place")
+        self.assertEqual('11', amy.tile, "Tile for amy isnt right")
         self.assertEqual([0, 4], [bob.x_pos, bob.y_pos], "Bob isnt in the right place")
         self.assertEqual([4, 2], [cathy.x_pos, cathy.y_pos], "Cathy isnt in the right place")
 
@@ -195,7 +229,34 @@ class MyTestCase(unittest.TestCase):
 
         self.assertEqual(5, amy.resource, "amys got an odd amount of coins")
 
+    #TODO finish up conflict tests
+    def test_conflict_states(self):
+        game_state = GameState(debug=True)
+        self.assertIsNotNone(game_state)
+        amy = game_state.players[0]
+        bob = game_state.players[1]
+        cathy = game_state.players[2]
 
+        # a player fights
+        #move amy to a fight place
+        game_state.update_state({f'{amy.name}': 'n', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
+        game_state.update_state({f'{amy.name}': 'e', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
+        self.assertEqual('20', amy.tile)
+        path = Pathing.find_path(bob.tile, amy.tile, game_state.game_map)
+        player_path = Pathing.translate_path(path)
+        amy.health = 10  # cripple amy
+
+        for move in player_path:
+         game_state.update_state({f'{amy.name}': 'h', f'{bob.name}': move, f'{cathy.name}': 'h'})
+        bobs_health = bob.health + 1
+        # player collision
+        self.assertNotEqual(bob.tile, amy.tile)
+        # after the fight amy should have only one health and amy should be at the previous tile and bob should have a
+        # reduction in health and be in amys place
+        self.assertEqual(1, amy.health or bob.health)
+        self.assertEqual('10', amy.tile)
+        self.assertEqual('20', bob.tile)
+        self.assertLess(bobs_health, bob.health)
 
 
     def count_specific_objects(self, nested_list, target_object):

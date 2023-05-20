@@ -19,22 +19,34 @@ class Player:
         self.coords = [x_pos,y_pos]
         self.tile = f'{x_pos}{y_pos}'
         self.max_health = self.health = health
+        self.base = self.tile
 
     def set_target(self,x_pos, y_pos):
         self.target_x = x_pos
         self.target_y = y_pos
         self.target_coords = [x_pos,y_pos]
 
-    def move_player(self, direction):
+    def update_coords(self, x, y):
+        self.coords = [x,y]
+        self.x_pos = x
+        self.y_pos = y
+        self.tile=f'{x}{y}'
+
+    def move_player(self, tile):
+        self.coords = [tile[0], tile[1]]
+        self.tile = tile
+
+    def next_tile(self, direction):
+        x = self.x_pos
+        y = self.y_pos
         if direction == 'n':
-            self.y_pos -= 1
+            y -= 1
         elif direction == 'e':
-            self.x_pos += 1
+            x += 1
         elif direction == 's':
-            self.y_pos += 1
+            y += 1
         elif direction == 'w':
-            self.x_pos -= 1
+            x -= 1
         elif direction == 'h':
-            return
-        self.coords = [self.x_pos, self.y_pos]
-        self.tile = f'{self.x_pos}{self.y_pos}'
+            return f'{self.x_pos}{self.y_pos}'
+        return f'{x}{y}'

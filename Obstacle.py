@@ -4,3 +4,4 @@ class Obstacle:
         self.y_location = y_location
         self.coords = [x_location, y_location]
         self.passble = passble
+        self.tile = f'{x_location}{y_location}'

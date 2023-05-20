@@ -52,3 +52,27 @@ class Pathing:
             shortest_path.append(end)
 
         return shortest_path
+
+
+    @staticmethod
+    def convert_tile_transisiton_to_direction(source_tile, target_tile):
+        source_x = int(source_tile[0])
+        source_y = int(source_tile[1])
+        destination_x = int(target_tile[0])
+        destination_y = int(target_tile[1])
+        if destination_x < source_x:
+            return 'w'
+        elif destination_x > source_x:
+            return 'e'
+        elif destination_y < source_y:
+            return 'n'
+        elif destination_y > source_y:
+            return 's'
+        return None
+
+    @staticmethod
+    def translate_path(tile_objects):
+        direction_steps = []
+        for index in range(1,len(tile_objects)-1):
+            direction_steps.append(Pathing.convert_tile_transisiton_to_direction(tile_objects[index-1], tile_objects[index]))
+        return direction_steps
