@@ -1,3 +1,6 @@
+from Pathing import Pathing
+
+
 class Player:
     def __init__(self, identifier):
         self.name = identifier
@@ -11,13 +14,15 @@ class Player:
         self.coords = None
         self.target_coords = None
         self.tile = None
-
+        self.previous_tile = None
+        self.returning = False
 
     def set(self,x_pos, y_pos, health):
         self.x_pos = x_pos
         self.y_pos = y_pos
         self.coords = [x_pos,y_pos]
         self.tile = f'{x_pos}{y_pos}'
+        self.previous_tile = self.tile
         self.max_health = self.health = health
         self.base = self.tile
 
@@ -33,8 +38,18 @@ class Player:
         self.tile=f'{x}{y}'
 
     def move_player(self, tile):
-        self.coords = [tile[0], tile[1]]
+        if tile != self.previous_tile:
+            self.previous_tile = self.tile
+        self.coords = [int(tile[0]), int(tile[1])]
         self.tile = tile
+
+    def go_back(self):
+        self.tile = self.previous_tile
+
+    def return_to_base(self, map):
+        self.returning = True
+        path_to_base = Pathing.find_path(self.tile, self.base, map)
+        return path_to_base[1]
 
     def next_tile(self, direction):
         x = self.x_pos

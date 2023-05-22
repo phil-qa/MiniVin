@@ -1,3 +1,5 @@
+import random
+
 from Map import Map
 from Mine import Mine
 from Obstacle import Obstacle
@@ -28,28 +30,32 @@ class GameState:
         mine_tiles = [c.tile for c in self.mines]
         player_base_tiles = [c.tile for c in self.player_bases]
 
-        next_state = self.determine_next_state(activity_frame)
+        conflicts, next_state = self.resolve_next_state(activity_frame, mine_tiles, obstacle_tiles, player_base_tiles)
 
-        conflicts = {}
+        #resolve conflicts
+        #players in fight
+        conflict_tiles = set(conflicts.values())
+        for conflict_tile in conflict_tiles:
+            player_set = [p.key for p in conflicts if p.value == conflict_tile ]
+            while any(p.health != 1 for p in player_set):
+                fight_outcomes = {}
+                for fighter in player_set:
+                    fight_outcomes.append({fighter, random.randint(1,10)})
+                highest = {fighter for figher in fight_outcomes if fighter[1] == max([value[1] for value in fight_outcomes ])}
+                all = {p for p in player_set}
+                losers = all - highest
+                for loser in losers:
+                    loser.health -= 1
 
-        #determine outcomes from interactions with the map objects
-        for player, tile in next_state.items():
-            if tile in obstacle_tiles:
-                next_state[player] = player.tile
-            elif tile in mine_tiles:
-                if player.resource <5:
-                    player.resource += 1
-                next_state[player] = player.tile
-            elif tile in player_base_tiles:
-                if tile == player.base:
-                    next_state[player] = tile
-                else:
-                    next_state[player]=player.tile
-            for other_player, target_tile in next_state.items():
-                if other_player != player:
-                    if tile == target_tile:
-                        conflicts.add(player, tile)
-                        conflicts.add(other_player, target_tile)
+
+        # send losers back to their bases
+
+        for player in next_state.keys():
+            if player.health == 1:
+                next_state[player] = player.return_to_base()
+
+        for player in next_state.keys():
+            player.move_player(next_state[player])
 
 
 
@@ -69,6 +75,31 @@ class GameState:
                     active_player.resource += 1
                 self.player_revert(active_player, current_positions)'''
 
+    def resolve_next_state(self, activity_frame, mine_tiles, obstacle_tiles, player_base_tiles):
+        next_state = self.determine_next_state(activity_frame)
+        conflicts = {}
+        # determine outcomes from interactions with the map objects
+        for player, tile in next_state.items():
+            if tile in obstacle_tiles:
+                next_state[player] = player.tile
+            elif tile in mine_tiles:
+                if player.resource < 5:
+                    player.resource += 1
+                next_state[player] = player.tile
+            elif tile in player_base_tiles:
+                if tile == player.base:
+                    next_state[player] = tile
+                else:
+                    next_state[player] = player.tile
+            for other_player, target_tile in next_state.items():
+                if other_player != player:
+                    if tile == target_tile:
+                        if player not in conflicts.keys():
+                            conflicts[player] = tile
+                        if other_player not in conflicts.keys():
+                            conflicts[other_player] = target_tile
+        return conflicts, next_state
+
     def determine_next_state(self, activity_frame):
         moves = {}
         for player in self.players:
@@ -83,7 +114,7 @@ class GameState:
 
 
     def get_positional(self):
-        return [[p.name, p.x_pos, p.y_pos] for p in self.players]
+        return [[p.name, p.tile] for p in self.players]
 
     def move_target(self, direction, player):
         player.move_player(direction)
