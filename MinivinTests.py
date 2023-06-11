@@ -229,6 +229,24 @@ class MyTestCase(unittest.TestCase):
 
         self.assertEqual(5, amy.resource, "amys got an odd amount of coins")
 
+    def test_pathing(self):
+        game_state = GameState(debug=True)
+        self.assertIsNotNone(game_state)
+        amy = game_state.players[0]
+        bob = game_state.players[1]
+        cathy = game_state.players[2]
+
+        path_cathy_to_bob = Pathing.find_path(cathy.tile, bob.tile, game_state.game_map)
+        self.assertTrue(len(path_cathy_to_bob) > 0, 'The path from cathy to bob is not long enough')
+        self.assertEqual('31', path_cathy_to_bob[0], 'The path from cathy to bob does not start at cathy')
+        self.assertEqual('13', path_cathy_to_bob[-1], 'The path from cathy to bob does not end at bob')
+        translated_path = Pathing.translate_path(path_cathy_to_bob)
+        self.assertEqual('w', translated_path[0])
+        self.assertEqual('s', translated_path[1])
+        self.assertEqual('s', translated_path[2])
+        self.assertEqual('w', translated_path[-1])
+
+
     #TODO finish up conflict tests
     def test_conflict_states(self):
         game_state = GameState(debug=True)
@@ -237,17 +255,23 @@ class MyTestCase(unittest.TestCase):
         bob = game_state.players[1]
         cathy = game_state.players[2]
 
+
+
+
         # a player fights
         #move amy to a fight place
         game_state.update_state({f'{amy.name}': 'n', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
         game_state.update_state({f'{amy.name}': 'e', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
-        self.assertEqual('20', amy.tile)
-        path = Pathing.find_path(bob.tile, amy.tile, game_state.game_map)
-        player_path = Pathing.translate_path(path)
+        self.assertEqual('20', amy.tile, 'Amy is not in the right place in  conflict tests')
+        path_bob_to_amy = Pathing.find_path(bob.tile, amy.tile, game_state.game_map)
+        bobs_path = Pathing.translate_path(path_bob_to_amy)
         amy.health = 10  # cripple amy
 
-        for move in player_path:
-         game_state.update_state({f'{amy.name}': 'h', f'{bob.name}': move, f'{cathy.name}': 'h'})
+        for move in bobs_path:
+            bob_state = bob.tile
+            game_state.update_state({f'{amy.name}': 'h', f'{bob.name}': move, f'{cathy.name}': 'h'})
+            self.assertNotEqual(bob.tile, bob_state)
+        #keeping bob the same health
         bobs_health = bob.health + 1
         # player collision
         self.assertNotEqual(bob.tile, amy.tile)

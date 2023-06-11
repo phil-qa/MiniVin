@@ -73,6 +73,6 @@ class Pathing:
     @staticmethod
     def translate_path(tile_objects):
         direction_steps = []
-        for index in range(1,len(tile_objects)-1):
+        for index in range(1,len(tile_objects)):
             direction_steps.append(Pathing.convert_tile_transisiton_to_direction(tile_objects[index-1], tile_objects[index]))
         return direction_steps

@@ -80,18 +80,22 @@ class GameState:
         conflicts = {}
         # determine outcomes from interactions with the map objects
         for player, tile in next_state.items():
+            #legal move check
+            if '-' in tile or int(next_state[player][0])> self.map_size or int(next_state[player][1]> self.map_size):
+                next_state[player] = player.tile
+            #if the next tile is in the obstacles then the player stops
             if tile in obstacle_tiles:
                 next_state[player] = player.tile
-            elif tile in mine_tiles:
+            elif tile in mine_tiles: #If next tile is a mine tile, player stays in the same place and gets a coin
                 if player.resource < 5:
                     player.resource += 1
                 next_state[player] = player.tile
-            elif tile in player_base_tiles:
+            elif tile in player_base_tiles: # if the next tile is the player base go to it if not stay
                 if tile == player.base:
                     next_state[player] = tile
                 else:
                     next_state[player] = player.tile
-            for other_player, target_tile in next_state.items():
+            for other_player, target_tile in next_state.items(): # is there a collision with the other player then conflict
                 if other_player != player:
                     if tile == target_tile:
                         if player not in conflicts.keys():

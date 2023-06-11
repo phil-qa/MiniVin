@@ -38,10 +38,16 @@ class Player:
         self.tile=f'{x}{y}'
 
     def move_player(self, tile):
-        if tile != self.previous_tile:
-            self.previous_tile = self.tile
-        self.coords = [int(tile[0]), int(tile[1])]
-        self.tile = tile
+        try:
+            print(f"{self.name} is moving from {self.previous_tile} to {tile}")
+            if tile != self.previous_tile:
+                self.previous_tile = self.tile
+            self.coords = [int(tile[0]), int(tile[1])]
+            self.x_pos = self.coords[0]
+            self.y_pos = self.coords[1]
+            self.tile = tile
+        except() as e:
+            print(e.message)
 
     def go_back(self):
         self.tile = self.previous_tile
