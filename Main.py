@@ -81,7 +81,7 @@ class GameState:
         # determine outcomes from interactions with the map objects
         for player, tile in next_state.items():
             #legal move check
-            if '-' in tile or int(next_state[player][0])> self.map_size or int(next_state[player][1]> self.map_size):
+            if '-' in tile or int(next_state[player][0])> self.map_size-1 or int(next_state[player][1])> self.map_size-1:
                 next_state[player] = player.tile
             #if the next tile is in the obstacles then the player stops
             if tile in obstacle_tiles:
