@@ -49,13 +49,14 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(len(map.get_objects('player_base')),4, "Failed to find the correct number of player bases")
 
 
-    def test_get_object_at_location(self):
-        map = Map(4)
-        map.set_objects(players=4, debug=True)
-        single_object = map.get_object(0,0)
-        self.assertIsNotNone(single_object)
-        self.assertEqual(single_object.x_position, 0)
-        self.assertEqual(single_object.y_position, 0)
+    def test_get_object_by_tile(self):
+        game_state, amy, bob, cathy = self.set_debug_game_state()
+        mine = game_state.game_map.get_tile_object('12')
+        amy_position = game_state.game_map.get_tile_object(amy.tile)
+        obstacle = game_state.game_map.get_tile_object('22')
+        self.assertTrue(mine.name == 'mine')
+        self.assertTrue(amy_position.name == 'amy')
+        self.assertTrue(obstacle.name == 'obstacle')
 
     def test_translate_tile_direction(self):
         source_tile = '22'
@@ -65,10 +66,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual('w', Pathing.convert_tile_transisiton_to_direction(source_tile, '12'))
 
     def test_get_path(self):
-        game_state = GameState(debug = True)
-        amy = game_state.players[0]
-        bob = game_state.players[1]
-        cathy = game_state.players[2]
+        game_state, amy, bob, cathy = self.set_debug_game_state()
         mine = game_state.mines[0]
 
         path_amy_to_mine1 = Pathing.find_path(amy.tile, mine.tile, game_state.game_map)
@@ -142,6 +140,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(game_state.players[0].x_pos, game_state.player_bases[0].x_position)
         self.assertEqual(game_state.players[0].y_pos, game_state.player_bases[0].y_position)
 
+
     def test_game_state_events(self):
         '''
         given an initialised map
@@ -154,11 +153,7 @@ class MyTestCase(unittest.TestCase):
         3*b***
         4***m*
         '''
-        game_state = GameState(debug=True)
-        self.assertIsNotNone(game_state)
-        amy = game_state.players[0]
-        bob = game_state.players[1]
-        cathy = game_state.players[2]
+        game_state, amy, bob, cathy = self.set_debug_game_state()
 
         starting_positions = game_state.players.copy()
 
@@ -230,11 +225,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(5, amy.resource, "amys got an odd amount of coins")
 
     def test_pathing(self):
-        game_state = GameState(debug=True)
-        self.assertIsNotNone(game_state)
-        amy = game_state.players[0]
-        bob = game_state.players[1]
-        cathy = game_state.players[2]
+        game_state, amy, bob, cathy = self.set_debug_game_state()
 
         path_cathy_to_bob = Pathing.find_path(cathy.tile, bob.tile, game_state.game_map)
         self.assertTrue(len(path_cathy_to_bob) > 0, 'The path from cathy to bob is not long enough')
@@ -246,6 +237,19 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual('s', translated_path[2])
         self.assertEqual('w', translated_path[-1])
 
+    def test_pathing_avoids_obstacles(self):
+        game_state = GameState(debug=True)
+        self.assertIsNotNone(game_state)
+        amy = game_state.players[0]
+        bob = game_state.players[1]
+        cathy = game_state.players[2]
+
+        path_bob_to_amy = Pathing.find_path(bob.tile, amy.tile, game_state.game_map)
+        blocking_objects = [game_object.tile for game_object in game_state.all_game_objects if game_object.passble == False]
+        self.assertIsNotNone(path_bob_to_amy)
+        self.assertIsTrue(0, len([path_item for path_item in path_bob_to_amy if path_item in blocking_objects]))
+
+
 
     #TODO finish up conflict tests
     def test_conflict_states(self):
@@ -254,7 +258,9 @@ class MyTestCase(unittest.TestCase):
         amy = game_state.players[0]
         bob = game_state.players[1]
         cathy = game_state.players[2]
-
+        game_state.update_state({f'{amy.name}': 'n', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
+        game_state.update_state({f'{amy.name}': 'e', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
+        self.assertEqual('20', amy.tile, 'Amy is not in the right place in  path block tests')
 
 
 
@@ -293,7 +299,18 @@ class MyTestCase(unittest.TestCase):
                 count += 1  # Increment count for matching object
         return count
 
+    @property
+    def set_debug_game_state(self):
+        object_array = [GameState(debug=True)]
 
+        object_array.append(object_array[0].players[0])
+        object_array.append(object_array[0].players[1])
+        object_array.append(object_array[0].players[2])
+        game_state = object_array[0]
+        amy = object_array[1]
+        bob = object_array[2]
+        cathy = object_array[3]
+        return game_state, amy, bob, cathy
 
 if __name__ == '__main__':
     unittest.main()

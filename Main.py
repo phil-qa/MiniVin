@@ -1,5 +1,7 @@
 import random
 
+import selenium.webdriver.common.devtools.v85.target
+
 from Map import Map
 from Mine import Mine
 from Obstacle import Obstacle
@@ -17,6 +19,12 @@ class GameState:
         self.assign_players()
         self.mines = [Mine(min.x_position, min.y_position, name = min.name) for min in self.game_map.get_objects('mine')]
         self.obstacles = [Obstacle(ob.x_position, ob.y_position, ob.passable) for ob in self.game_map.get_objects('obstacle')]
+        self.all_game_objects =[]
+
+        self.all_game_objects.extend(self.players)
+        self.all_game_objects.extend(self.mines)
+        self.all_game_objects.extend(self.player_bases)
+        self.all_game_objects.extend(self.obstacles)
 
     def assign_players(self):
         for player, base in zip(self.players, self.player_bases):
@@ -78,30 +86,46 @@ class GameState:
     def resolve_next_state(self, activity_frame, mine_tiles, obstacle_tiles, player_base_tiles):
         next_state = self.determine_next_state(activity_frame)
         conflicts = {}
-        # determine outcomes from interactions with the map objects
-        for player, tile in next_state.items():
-            #legal move check
-            if '-' in tile or int(next_state[player][0])> self.map_size-1 or int(next_state[player][1])> self.map_size-1:
-                next_state[player] = player.tile
-            #if the next tile is in the obstacles then the player stops
-            if tile in obstacle_tiles:
-                next_state[player] = player.tile
-            elif tile in mine_tiles: #If next tile is a mine tile, player stays in the same place and gets a coin
-                if player.resource < 5:
-                    player.resource += 1
-                next_state[player] = player.tile
-            elif tile in player_base_tiles: # if the next tile is the player base go to it if not stay
-                if tile == player.base:
-                    next_state[player] = tile
+        # determine outcomes from interactions with the map objects, get each current_player and where they are going
+        for current_player, tile in next_state.items():
+            # If the proposed move is outside the map bouds the current_player stays the same
+            if '-' in tile or int(next_state[current_player][0])> self.map_size-1 or int(next_state[current_player][1])> self.map_size-1:
+                next_state[current_player] = current_player.tile
+
+            #if the next tile is in the obstacles then the current_player stops
+            elif tile in obstacle_tiles:
+                next_state[current_player] = current_player.tile
+
+            # If next tile is a mine tile, current_player stays in the same place and gets a coin
+            elif tile in mine_tiles:
+                if current_player.resource < 5:
+                    current_player.resource += 1
+                next_state[current_player] = current_player.tile
+
+            # if the next tile is the current_player base go to it if not stay
+            elif tile in player_base_tiles:
+                if tile == current_player.base:
+                    next_state[current_player] = tile
                 else:
-                    next_state[player] = player.tile
-            for other_player, target_tile in next_state.items(): # is there a collision with the other player then conflict
-                if other_player != player:
-                    if tile == target_tile:
-                        if player not in conflicts.keys():
-                            conflicts[player] = tile
-                        if other_player not in conflicts.keys():
-                            conflicts[other_player] = target_tile
+                    next_state[current_player] = current_player.tile
+
+        # after all the future states have been determined, run a conflict check
+        distinct_values = set(next_state.values())
+        if len(distinct_values) < len(activity_frame):
+            players_matching = [[player.key for player in next_state.items() if player.value == active_tile] for active_tile in distinct_values]
+            for conflict_set in players_matching:
+                while len([player_with_health for player_with_health in conflict_set if player_with_health.health > 1 ]) >1 :
+                    conflict_set = self.resolve_conflict(conflict_set)
+
+
+
+        for other_player, target_tile in next_state.items(): # is there a collision with the other current_player then conflict
+            if other_player != current_player:
+                if tile == target_tile:
+                    if current_player not in conflicts.keys():
+                        conflicts[current_player] = tile
+                    if other_player not in conflicts.keys():
+                        conflicts[other_player] = target_tile
         return conflicts, next_state
 
     def determine_next_state(self, activity_frame):
@@ -122,6 +146,16 @@ class GameState:
 
     def move_target(self, direction, player):
         player.move_player(direction)
+
+    def resolve_conflict(self,players):
+        fighters = [player for player in players if player.health > 1]
+        random_fight_values = [random.randint(1,100) for fighter in fighters]
+        winner = players[max( (v, i) for i, v in enumerate(random_fight_values) )[1]]
+        for loser in players :
+            if loser != winner:
+                loser.health -=1
+        return players
+
 
 
 
