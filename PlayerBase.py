@@ -5,5 +5,6 @@ class PlayerBase:
         self.resource = 0
         self.player = None
         self.coords = [x_location, y_location]
-        self.tile = f'{x_location}{y_location}'
+        self.name = f'{x_location}{y_location}'
+
 

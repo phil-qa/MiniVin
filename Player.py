@@ -4,8 +4,8 @@ from Pathing import Pathing
 class Player:
     def __init__(self, identifier):
         self.name = identifier
-        self.x_pos = None
-        self.y_pos = None
+        self.x_position = None
+        self.y_position = None
         self.health = None
         self.max_health = None
         self.resource = 0
@@ -19,8 +19,8 @@ class Player:
         self.passable = True # this allows other players to collide
 
     def set(self,x_pos, y_pos, health):
-        self.x_pos = x_pos
-        self.y_pos = y_pos
+        self.x_position = x_pos
+        self.y_position = y_pos
         self.coords = [x_pos,y_pos]
         self.tile = f'{x_pos}{y_pos}'
         self.previous_tile = self.tile
@@ -34,8 +34,8 @@ class Player:
 
     def update_coords(self, x, y):
         self.coords = [x,y]
-        self.x_pos = x
-        self.y_pos = y
+        self.x_position = x
+        self.y_position = y
         self.tile=f'{x}{y}'
 
     def move_player(self, tile):
@@ -44,8 +44,8 @@ class Player:
             if tile != self.previous_tile:
                 self.previous_tile = self.tile
             self.coords = [int(tile[0]), int(tile[1])]
-            self.x_pos = self.coords[0]
-            self.y_pos = self.coords[1]
+            self.x_position = self.coords[0]
+            self.y_position = self.coords[1]
             self.tile = tile
         except() as e:
             print(e.message)
@@ -59,8 +59,8 @@ class Player:
         return path_to_base[1]
 
     def next_tile(self, direction):
-        x = self.x_pos
-        y = self.y_pos
+        x = self.x_position
+        y = self.y_position
         if direction == 'n':
             y -= 1
         elif direction == 'e':
@@ -70,5 +70,5 @@ class Player:
         elif direction == 'w':
             x -= 1
         elif direction == 'h':
-            return f'{self.x_pos}{self.y_pos}'
+            return f'{self.x_position}{self.y_position}'
         return f'{x}{y}'

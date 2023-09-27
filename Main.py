@@ -13,6 +13,7 @@ class GameState:
     def __init__(self, players = ['amy', 'bob', 'cath'], map_size = 5, debug=False):
         self.map_size = map_size
         self.game_map = Map(map_size)
+        self.viz_map = [[0 for x in range(map_size)] for y in range(map_size) ]
         self.game_map.set_objects(len(players), debug)
         self.players = [Player(pl) for pl in players]
         self.player_bases = [PlayerBase(ba.x_position, ba.y_position) for ba in self.game_map.get_objects('player_base')]
@@ -25,18 +26,20 @@ class GameState:
         self.all_game_objects.extend(self.mines)
         self.all_game_objects.extend(self.player_bases)
         self.all_game_objects.extend(self.obstacles)
+        self._update_viz_map()
 
     def assign_players(self):
         for player, base in zip(self.players, self.player_bases):
             player.set(base.x_position, base.y_position, 50)
-            base.player = f'{player.name}_base'
+            base.player = player.name
+            base.name = f'{player.name}_base'
         test = 'stop'
 
     def update_state(self, activity_frame):
         current_positions = self.get_positional()
-        obstacle_tiles = [c.tile for c in self.obstacles]
+        obstacle_tiles = [c.name for c in self.obstacles]
         mine_tiles = [c.tile for c in self.mines]
-        player_base_tiles = [c.tile for c in self.player_bases]
+        player_base_tiles = [c.name for c in self.player_bases]
 
         conflicts, next_state = self.resolve_next_state(activity_frame, mine_tiles, obstacle_tiles, player_base_tiles)
 
@@ -72,7 +75,7 @@ class GameState:
         '''        for player, activity in activity_frame.items():
             active_player = [pl for pl in self.players if pl.name == player][0]
             self.move_target(direction = activity, player = active_player)
-            if active_player.x_pos < 0 or active_player.x_pos == self.map_size or active_player.y_pos <0 or active_player.y_pos == self.map_size:
+            if active_player.x_position < 0 or active_player.x_position == self.map_size or active_player.y_position <0 or active_player.y_position == self.map_size:
                 self.player_revert(active_player, current_positions)
 
             if active_player.coords in obstacle_coords:
@@ -92,17 +95,17 @@ class GameState:
             if '-' in tile or int(next_state[current_player][0])> self.map_size-1 or int(next_state[current_player][1])> self.map_size-1:
                 next_state[current_player] = current_player.tile
 
-            #if the next tile is in the obstacles then the current_player stops
+            #if the next name is in the obstacles then the current_player stops
             elif tile in obstacle_tiles:
                 next_state[current_player] = current_player.tile
 
-            # If next tile is a mine tile, current_player stays in the same place and gets a coin
+            # If next name is a mine name, current_player stays in the same place and gets a coin
             elif tile in mine_tiles:
                 if current_player.resource < 5:
                     current_player.resource += 1
                 next_state[current_player] = current_player.tile
 
-            # if the next tile is the current_player base go to it if not stay
+            # if the next name is the current_player base go to it if not stay
             elif tile in player_base_tiles:
                 if tile == current_player.base:
                     next_state[current_player] = tile
@@ -155,6 +158,12 @@ class GameState:
             if loser != winner:
                 loser.health -=1
         return players
+
+    def _update_viz_map(self):
+        for map_object in self.all_game_objects:
+            
+            self.viz_map[map_object.y_position][map_object.x_position]=map_object.name
+
 
 
 
