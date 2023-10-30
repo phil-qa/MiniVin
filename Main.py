@@ -37,11 +37,11 @@ class GameState:
 
     def update_state(self, activity_frame):
         current_positions = self.get_positional()
-        obstacle_tiles = [c.name for c in self.obstacles]
+        obstacle_tiles = {c.name for c in self.obstacles}
         mine_tiles = [c.tile for c in self.mines]
         player_base_tiles = [c.name for c in self.player_bases]
 
-        conflicts, next_state = self.resolve_next_state(activity_frame, mine_tiles, obstacle_tiles, player_base_tiles)
+        conflicts, next_state = self.resolve_next_state(activity_frame)
 
         #resolve conflicts
         #players in fight
@@ -86,29 +86,38 @@ class GameState:
                     active_player.resource += 1
                 self.player_revert(active_player, current_positions)'''
 
-    def resolve_next_state(self, activity_frame, mine_tiles, obstacle_tiles, player_base_tiles):
+    def resolve_next_state(self, activity_frame):
+        '''
+
+        :param activity_frame: dictionary of player names and their next move
+        :param mine_tiles: dictionary of mines and their tiles
+        :param obstacle_tiles: dictionary of the obstacles and their tiles
+        :param player_base_tiles: dictionary of the player bases
+        :return:
+        '''
         next_state = self.determine_next_state(activity_frame)
         conflicts = {}
         # determine outcomes from interactions with the map objects, get each current_player and where they are going
-        for current_player, tile in next_state.items():
-            # If the proposed move is outside the map bouds the current_player stays the same
-            if '-' in tile or int(next_state[current_player][0])> self.map_size-1 or int(next_state[current_player][1])> self.map_size-1:
+        for current_player, next_tile in next_state.items():
+            # If the proposed move is outside the map bounds the current_player stays the same
+            out_of_bounds_rule = int(next_state[current_player][0])> self.map_size-1 or int(next_state[current_player][1])> self.map_size-1
+            if '-' in next_tile or out_of_bounds_rule:
                 next_state[current_player] = current_player.tile
 
-            #if the next name is in the obstacles then the current_player stops
-            elif tile in obstacle_tiles:
+            #if the next next_tile is in the obstacles then the current_player stops
+            elif next_tile in [obstacle.tile for obstacle in  self.obstacles]:
                 next_state[current_player] = current_player.tile
 
             # If next name is a mine name, current_player stays in the same place and gets a coin
-            elif tile in mine_tiles:
+            elif next_tile in [mine_tile.tile for mine_tile in self.mines]:
                 if current_player.resource < 5:
                     current_player.resource += 1
                 next_state[current_player] = current_player.tile
 
             # if the next name is the current_player base go to it if not stay
-            elif tile in player_base_tiles:
-                if tile == current_player.base:
-                    next_state[current_player] = tile
+            elif next_tile in [player_base.tile for player_base in self.player_bases]:
+                if next_tile == current_player.base:
+                    next_state[current_player] = next_tile
                 else:
                     next_state[current_player] = current_player.tile
 
@@ -124,14 +133,19 @@ class GameState:
 
         for other_player, target_tile in next_state.items(): # is there a collision with the other current_player then conflict
             if other_player != current_player:
-                if tile == target_tile:
+                if next_tile == target_tile:
                     if current_player not in conflicts.keys():
-                        conflicts[current_player] = tile
+                        conflicts[current_player] = next_tile
                     if other_player not in conflicts.keys():
                         conflicts[other_player] = target_tile
         return conflicts, next_state
 
     def determine_next_state(self, activity_frame):
+        '''
+        determines the next move tile for each player based off the activity frame values
+        :param activity_frame: dictionary of the player names and their requested moves
+        :return: dictionary of players and their next move tile
+        '''
         moves = {}
         for player in self.players:
             moves[player] = player.next_tile(activity_frame[player.name])

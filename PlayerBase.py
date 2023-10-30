@@ -6,5 +6,15 @@ class PlayerBase:
         self.player = None
         self.coords = [x_location, y_location]
         self.name = f'{x_location}{y_location}'
+        self.tile = f'{x_location}{y_location}'
+
+    def set_player_base_owner(self, owner):
+        '''
+        setter for the player
+        :param owner: player object
+        :return:
+        '''
+        self.player = owner
+
 
 

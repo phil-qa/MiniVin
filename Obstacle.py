@@ -5,3 +5,4 @@ class Obstacle:
         self.coords = [x_location, y_location]
         self.passble = passble
         self.name = f'obstacle'
+        self.tile=f'{x_location}{y_location}'
