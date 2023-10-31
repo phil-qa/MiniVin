@@ -1,3 +1,4 @@
+from GameTile import GameTile
 import math
 import random
 import networkx as nx
@@ -13,30 +14,30 @@ class Map:
 
     def _initialise_empty_map(self, size):
         '''
-        Function to initise the map,
-        :param size: int x and y size, debug
+        Initialise an empty map,
+        :param size: int x and y size
         :return:
         '''
         blank_build = []
         for y in range(size):
-            blank_build.append([MapObject('empty', x, y) for x in range(size)])
+            blank_build.append([GameTile('empty', x, y) for x in range(size)])
         self.map_array = blank_build
 
     def set_objects(self, players, debug):
         '''
-        Function to set the game space objects, based on the size of the map, if in debug then set the static map
+        Set the game space objects, based on the size of the map, if in debug then set the static map
         :param players: int number of players arriving
-        :param debug: bool for if the static map is to be setup fort testing
+        :param debug: bool for if the static map is to be setup for testing
         :return:
         '''
         if debug:
-            self.map_array[2][2] = MapObject('obstacle', 0)
-            self.map_array[1][1] = MapObject('player_base', 0)
-            self.map_array[1][3] = MapObject('player_base', 1)
-            self.map_array[3][1] = MapObject('player_base', 2)
-            self.map_array[3][3] = MapObject('player_base', 3)
-            self.map_array[1][2] = MapObject('mine', 0)
-            self.map_array[3][3] = MapObject('mine', 1)
+            self.map_array[2][2] = GameTile('obstacle', 0)
+            self.map_array[1][1] = GameTile('player_base', 0)
+            self.map_array[1][3] = GameTile('player_base', 1)
+            self.map_array[3][1] = GameTile('player_base', 2)
+            self.map_array[3][3] = GameTile('player_base', 3)
+            self.map_array[1][2] = GameTile('mine', 0)
+            self.map_array[3][3] = GameTile('mine', 1)
 
             for x in range(4):
                 for y in range(4):
@@ -66,14 +67,14 @@ class Map:
 
     def create_map_object(self, map_object_type, number):
         '''
-        Function to add objects to the map
+        Add objects to the map
         :param type: list of object types
-        :param number: number of type to be added
+        :param number(int): number of type to be added
         :return:
         '''
         instance = 0
         for element in range(number):
-            map_object = MapObject(map_object_type, instance)
+            map_object = GameTile(map_object_type, instance)
             instance += 1
             while True:
                 rand_x = random.randint(0, self.size - 1)
@@ -86,35 +87,6 @@ class Map:
 
 
 
-class MapObject:
-    def __init__(self, type, instance, x_location=0, y_location=0):
-        self.name = f'{type}{str(instance)}'
-        self.type = type
-        self.x_position = x_location
-        self.y_position = y_location
-        self.tile = f'{x_location}{y_location}'
-        if type == 'empty':
-            self.symbol = 0
-            self.resource = 0
-            self.passable = True
-        elif type == 'obstacle':
-            self.symbol = 'o'
-            self.resource = 0
-            self.passable = False
-        elif type == 'mine':
-            self.symbol = 'm'
-            self.resource = random.randint(16, 32)
-            self.passable = False
-        elif type == 'player_base':
-            self.symbol = self.name
-            self.resource = 0
-            self.passable = False
-            self.symbol = 'b'
 
-    def update_location(self, x, y):
-        self.x_position = x
-        self.y_position = y
-        self.coords = [x, y]
-        self.tile = f'{x}{y}'
 
 

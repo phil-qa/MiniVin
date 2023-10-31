@@ -100,7 +100,7 @@ class GameState:
         # determine outcomes from interactions with the map objects, get each current_player and where they are going
         for current_player, next_tile in next_state.items():
             # If the proposed move is outside the map bounds the current_player stays the same
-            out_of_bounds_rule = int(next_state[current_player][0])> self.map_size-1 or int(next_state[current_player][1])> self.map_size-1
+            out_of_bounds_rule = int(next_state[current_player][0]) > self.map_size - 1 or int(next_state[current_player][1]) > self.map_size - 1
             if '-' in next_tile or out_of_bounds_rule:
                 next_state[current_player] = current_player.tile
 
