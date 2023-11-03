@@ -33,11 +33,6 @@ class Map:
         '''
         if debug:
             '''
-             0123
-            0eeee
-            1epmp
-            2eeoee
-            3
             '''
             self.game_tile_map[2][2] = GameTile('obstacle', 0)
             self.game_tile_map[1][1] = GameTile('player_base', 0)
@@ -45,7 +40,7 @@ class Map:
             self.game_tile_map[3][1] = GameTile('player_base', 2)
             self.game_tile_map[3][3] = GameTile('player_base', 3)
             self.game_tile_map[1][2] = GameTile('mine', 0)
-            self.game_tile_map[3][3] = GameTile('mine', 1)
+            self.game_tile_map[3][2] = GameTile('mine', 1)
 
             for x in range(4):
                 for y in range(4):

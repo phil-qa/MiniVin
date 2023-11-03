@@ -42,6 +42,7 @@ class MapTestModule(unittest.TestCase):
             map_objects['mines'] = map.get_tiles_by_type('mine')
             map_objects['player_bases'] = map.get_tiles_by_type('player_base')
             if debug:
+                print_map(map)
                 #Are the number of obstacles what we expect
                 self.assertEqual(len(map_objects['obstacles']),1,"The number of obstacles is incorrect")
                 #Are the number of mines correct
@@ -56,6 +57,14 @@ class MapTestModule(unittest.TestCase):
                     tile_values = [obstacle.tile for obstacle in map_objects['obstacles'].values()]
                     unique_tile_values = set(tile_values)
                     self.assertFalse(len(unique_tile_values) != len(tile_values), "there are some obstacles stuck together ")
+                if(len(map_objects['mines'])>1):
+                    tile_values = [obstacle.tile for obstacle in map_objects['mines'].values()]
+                    unique_tile_values = set(tile_values)
+                    self.assertFalse(len(unique_tile_values) != len(tile_values), "there are some mines stuck together ")
+                if(len(map_objects['player_bases'])>1):
+                    tile_values = [obstacle.tile for obstacle in map_objects['player_bases'].values()]
+                    unique_tile_values = set(tile_values)
+                    self.assertFalse(len(unique_tile_values) != len(tile_values), "there are some player bases stuck together ")
 
 
             for tiles_on_line in map.game_tile_map:
@@ -82,6 +91,21 @@ class MapTestModule(unittest.TestCase):
             for mine in mines:
                 self.assertEqual(f'{mine.x_position}{mine.y_position}', mine.name)
             self.assertEqual(len(map.get_objects('player_base')), 4, "Failed to find the correct number of player bases")
+
+def print_map(map : Map):
+    print('  ', end='')
+    for row in range(len(map.game_tile_map[0])):
+        print (row, ' ', end='')
+    print('')
+    row_number = 0
+    for row in map.game_tile_map:
+
+        print(row_number,'', end='')
+        row_number+=1
+        for column in row:
+            print(column.symbol,' ',end='')
+        print('')
+
 
 
 if __name__ == '__main__':

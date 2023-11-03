@@ -38,7 +38,7 @@ class Pathing:
                     graph.add_edge(key, n)
         return graph
 
-    # Create a graph object. build off  hand in original map
+    # Create a graph object. build offhand in original map
 
     @classmethod
     def build_graph(cls, map):
