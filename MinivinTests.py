@@ -41,7 +41,7 @@ class MyTestCase(unittest.TestCase):
         for tile in path_amy_to_mine1[1:-2]:
             x = int(tile[0])
             y = int(tile[1])
-            object_at_location = game_state.game_map.get_object(x,y)
+            object_at_location = game_state.game_map.get_tile(x, y)
             self.assertEqual(True, object_at_location.passable, f"stepped on a non passable square at {tile}")
 
         # assert direction steps

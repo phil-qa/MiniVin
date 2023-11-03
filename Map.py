@@ -8,7 +8,8 @@ import Pathing
 
 class Map:
     def __init__(self, size):
-        self.map_array = []
+        self.game_tile_map = []
+        self.game_tiles = []
         self.size = size
         self._initialise_empty_map(size)
 
@@ -18,10 +19,10 @@ class Map:
         :param size: int x and y size
         :return:
         '''
-        blank_build = []
         for y in range(size):
-            blank_build.append([GameTile('empty', x, y) for x in range(size)])
-        self.map_array = blank_build
+            self.game_tile_map.append([GameTile('empty', x, y) for x in range(size)])
+
+    
 
     def set_objects(self, players, debug):
         '''
@@ -31,35 +32,50 @@ class Map:
         :return:
         '''
         if debug:
-            self.map_array[2][2] = GameTile('obstacle', 0)
-            self.map_array[1][1] = GameTile('player_base', 0)
-            self.map_array[1][3] = GameTile('player_base', 1)
-            self.map_array[3][1] = GameTile('player_base', 2)
-            self.map_array[3][3] = GameTile('player_base', 3)
-            self.map_array[1][2] = GameTile('mine', 0)
-            self.map_array[3][3] = GameTile('mine', 1)
+            '''
+             0123
+            0eeee
+            1epmp
+            2eeoee
+            3
+            '''
+            self.game_tile_map[2][2] = GameTile('obstacle', 0)
+            self.game_tile_map[1][1] = GameTile('player_base', 0)
+            self.game_tile_map[1][3] = GameTile('player_base', 1)
+            self.game_tile_map[3][1] = GameTile('player_base', 2)
+            self.game_tile_map[3][3] = GameTile('player_base', 3)
+            self.game_tile_map[1][2] = GameTile('mine', 0)
+            self.game_tile_map[3][3] = GameTile('mine', 1)
 
             for x in range(4):
                 for y in range(4):
-                    target_object = self.map_array[x][y]
+                    target_object = self.game_tile_map[x][y]
                     target_object.update_location(x, y)
                     print(f"x:{x} , y:{y} object :{target_object.coords}, type: {target_object.name}")
-            return
-
-        blocking_object_count = math.ceil(self.size / 2)
-        self.create_map_object('obstacle', blocking_object_count)
-        self.create_map_object('player_base', players)
-        self.create_map_object('mine', blocking_object_count)
+        else:
+            blocking_object_count = math.ceil(self.size / 2)
+            self.create_map_object('obstacle', blocking_object_count)
+            self.create_map_object('player_base', players)
+            self.create_map_object('mine', blocking_object_count)
+        for column in range(self.size):
+            for row in range(self.size):
+                self.game_tiles.append(self.game_tile_map[column][row])
 
     def get_objects(self, object_type):
         found_objects = []
-        for line in self.map_array:
+        for line in self.game_tile_map:
             found_objects.extend([ob for ob in line if ob.type == object_type])
         return found_objects
 
-    def get_object(self, x, y):
-        return self.map_array[x][y]
-
+    def get_tile(self, x, y):
+        return self.game_tile_map[x][y]
+    def get_tiles_by_type(self, type):
+        '''
+        Get tiles from tile pool by type
+        :param type (str):
+        :return List[GameTile]:
+        '''
+        return [tile for tile in self.game_tiles if tile.type == type]
 
 
     def get_path(self, object_1, object_2):
@@ -76,12 +92,13 @@ class Map:
         for element in range(number):
             map_object = GameTile(map_object_type, instance)
             instance += 1
+
             while True:
                 rand_x = random.randint(0, self.size - 1)
                 rand_y = random.randint(0, self.size - 1)
-                map_location = self.map_array[rand_x][rand_y]
+                map_location = self.game_tile_map[rand_x][rand_y]
                 if map_location.type == 'empty':
-                    self.map_array[rand_x][rand_y] = map_object
+                    self.game_tile_map[rand_x][rand_y] = map_object
                     map_object.update_location(rand_x, rand_y)
                     break
 

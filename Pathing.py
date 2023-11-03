@@ -14,7 +14,7 @@ class Pathing:
 
     @classmethod
     def check_target_passable(cls,target_x, target_y, map_object):
-        if map_object.map_array[target_x][target_y].passable:
+        if map_object.game_tile_map[target_x][target_y].passable:
             return True
         else:
             return False
