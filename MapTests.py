@@ -33,64 +33,83 @@ class MapTestModule(unittest.TestCase):
 
 
         for debug in [True, False]:
-            map.set_objects(players=4, debug=debug)
+            number_players_in_free_test = [4]
+            map.set_objects(players=number_players_in_free_test[0], debug=debug)
             print("Running in debug" if debug else "Runing non debug")
             # tiles have been set correctly according to get tile
             self.assertEqual(len(map.game_tiles), map_size**2, f"The number of game tiles shoud be {map_size**2}")
             map_objects = {}
             map_objects['obstacles'] = map.get_tiles_by_type('obstacle')
+            obstacle_count = len(map_objects['obstacles'])
             map_objects['mines'] = map.get_tiles_by_type('mine')
+            mine_count = len(map_objects['mines'])
             map_objects['player_bases'] = map.get_tiles_by_type('player_base')
+            player_base_count = len(map_objects['player_bases'])
+            map_objects['empty'] = map.get_tiles_by_type('empty')
+            empty_tiles_count = len(map_objects['empty'])
+
             if debug:
                 print_map(map)
+                #Given we have an explicit state then confirm the map draws in the way we wish
                 #Are the number of obstacles what we expect
-                self.assertEqual(len(map_objects['obstacles']),1,"The number of obstacles is incorrect")
+                self.assertEqual(obstacle_count , 1,"The number of obstacles is incorrect")
                 #Are the number of mines correct
-                self.assertEqual(len(map_objects['mines']), 2, "the number of mines is unexpected")
+                self.assertEqual(mine_count, 2, "the number of mines is unexpected")
                 #Are the number of player bases correct
-                self.assertEqual(len(map_objects['player_bases']), 4, "the number of player bases is unexpected")
+                self.assertEqual(player_base_count, 4, "the number of player bases is unexpected")
+                self.assertEqual(empty_tiles_count, map_size ** 2 - (obstacle_count + mine_count + player_base_count), "The number of empty tiles is incorrect in debug")
             else:
                 # there are half the number of one dimension as a non-movable name and the locations are not colliding
                 self.assertEqual(len(map_objects['obstacles']), map_size / 2, "Failed to get all blocking objects in non debug")
-                 # check blocking objects dont collide
-                if(len(map_objects['obstacles'])>1):
-                    tile_values = [obstacle.tile for obstacle in map_objects['obstacles'].values()]
-                    unique_tile_values = set(tile_values)
-                    self.assertFalse(len(unique_tile_values) != len(tile_values), "there are some obstacles stuck together ")
-                if(len(map_objects['mines'])>1):
-                    tile_values = [obstacle.tile for obstacle in map_objects['mines'].values()]
-                    unique_tile_values = set(tile_values)
-                    self.assertFalse(len(unique_tile_values) != len(tile_values), "there are some mines stuck together ")
-                if(len(map_objects['player_bases'])>1):
-                    tile_values = [obstacle.tile for obstacle in map_objects['player_bases'].values()]
-                    unique_tile_values = set(tile_values)
-                    self.assertFalse(len(unique_tile_values) != len(tile_values), "there are some player bases stuck together ")
+                self.assertEqual(len(map_objects['mines']), map_size /2, "Faied to find all mines")
 
 
+            self.test_for_overlaps(map)
+
+            #are the tile names correct the naming convention should be typecount
+            empty_iterator = empty_tiles_count
+            mine_iterator = mine_count
+            player_base_iterator = player_base_count
+            obstacle_iterator = obstacle_count
             for tiles_on_line in map.game_tile_map:
                 for tile in tiles_on_line:
-                    observed_tile = map.get_tile(tile.x_position, tile.y_position)
-                    self.assertEqual(observed_tile.name, tile.name,
-                                     f'the map object at {tile.x_position}{tile.y_position} is not correct')
+                    tile_type = tile.type
+                    if tile_type == 'obstacle':
+                        self.assertEqual(tile.name, f'obstacle{obstacle_count - obstacle_iterator}', f'incorrect identifier of obstacle {tile.name}, at {tile.tile}')
+                        obstacle_iterator -=1
+                    elif tile_type == 'mine':
+                        self.assertEqual(tile.name, f'mine{mine_count - mine_iterator}', f'incorrect identifier of mine {tile.name}, at {tile.tile}')
+                        mine_iterator -=1
+                    elif tile_type == 'player_base':
+                        self.assertEqual(tile.name, f'player_base{player_base_count - player_base_iterator}', f'incorrect identifier of player_base {tile.name}, at {tile.tile}')
+                        player_base_iterator -=1
+                    else:
+                        self.assertEqual(tile.name, f'empty{empty_tiles_count - empty_iterator}', f'incorrect identifier of empty {tile.name}, at {tile.tile} with debug as {debug}')
+                        empty_iterator -=1
 
-            blocking_objects = map.get_objects('obstacle')
-            self.assertNotEqual(blocking_objects[0].coords, blocking_objects[1].coords,
-                                "the blocking objects are glued together")
-            for bo in blocking_objects:
-                self.assertEqual(f'{bo.x_position}{bo.y_position}', bo.name)
 
-            # there are 4 player spawn points
-            self.assertEqual(self.count_specific_objects(map.game_tile_map, ['b']), 4, "Failed to get player base objects")
+
+            # the  number of spawn points is equal to the number of players
+            self.assertEqual(self.count_specific_objects(map.game_tile_map, ['b']), number_players_in_free_test[0], "Failed to get player base objects")
             spawn_points = map.get_objects('player_base')
             for sp in spawn_points:
                 self.assertEqual(f'{sp.x_position}{sp.y_position}', sp.name)
 
             # there are half the number of one dimension as gold mine locations
-            self.assertEqual(self.count_specific_objects(map.game_tile_map, ['m']), 2, "Failed to get mine objects")
+            self.assertEqual(self.count_specific_objects(map.game_tile_map, ['m']), number_players_in_free_test[0]/2, "Failed to get mine objects")
             mines = map.get_objects('mine')
+
             for mine in mines:
                 self.assertEqual(f'{mine.x_position}{mine.y_position}', mine.name)
-            self.assertEqual(len(map.get_objects('player_base')), 4, "Failed to find the correct number of player bases")
+
+
+    def test_for_overlaps(self, map: Map):
+        objects = ['mines', 'obstacles', 'player_bases']
+        for object in objects:
+            tile_values = [mine.tile for mine in map.get_tiles_by_type(object)]
+            unique_tile_values = set(tile_values)
+            self.assertFalse(len(unique_tile_values) != len(tile_values), f"there are some {object} stuck together ")
+
 
 def print_map(map : Map):
     print('  ', end='')

@@ -29,6 +29,10 @@ class GameState:
         self._update_viz_map()
 
     def assign_players(self):
+        '''
+        assignes the players that the session was initialised with to bases.
+        :return:
+        '''
         for player, base in zip(self.players, self.player_bases):
             player.set(base.x_position, base.y_position, 50)
             base.player = player.name

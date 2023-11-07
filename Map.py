@@ -19,8 +19,9 @@ class Map:
         :param size: int x and y size
         :return:
         '''
-        for y in range(size):
-            self.game_tile_map.append([GameTile('empty', x, y) for x in range(size)])
+
+        for instance_iterator, y in enumerate(range(size)):
+            self.game_tile_map.append([GameTile('empty',instance_iterator+x, x_location=x, y_location=y) for x in range(size)])
 
     
 
@@ -42,8 +43,8 @@ class Map:
             self.game_tile_map[1][2] = GameTile('mine', 0)
             self.game_tile_map[3][2] = GameTile('mine', 1)
 
-            for x in range(4):
-                for y in range(4):
+            for x in range(5):
+                for y in range(5):
                     target_object = self.game_tile_map[x][y]
                     target_object.update_location(x, y)
                     print(f"x:{x} , y:{y} object :{target_object.coords}, type: {target_object.name}")
