@@ -19,9 +19,17 @@ class Map:
         :param size: int x and y size
         :return:
         '''
+        instance_iterator = 0
+        for y in range(size):
+            line=[]
+            for x in range(size):
+                new_tile = GameTile('empty', instance_iterator,x,y)
+                line.append(new_tile)
+                instance_iterator +=1
+            self.game_tile_map.append(line)
+        y=1
 
-        for instance_iterator, y in enumerate(range(size)):
-            self.game_tile_map.append([GameTile('empty',instance_iterator+x, x_location=x, y_location=y) for x in range(size)])
+
 
     
 
