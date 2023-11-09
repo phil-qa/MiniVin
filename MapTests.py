@@ -73,7 +73,7 @@ class MapTestModule(unittest.TestCase):
                 for mine in mines:
                     self.assertEqual(f'{mine.x_position}{mine.y_position}', mine.tile)
 
-            self.test_for_overlaps(map)
+            self.overlap_check(map)
 
 
 
@@ -107,7 +107,7 @@ class MapTestModule(unittest.TestCase):
                                      f'incorrect identifier of player_base {tile.name}, at {tile.tile}')
                     player_base_iterator -= 1
 
-    def test_for_overlaps(self, map: Map):
+    def overlap_check(self, map):
         objects = ['mines', 'obstacles', 'player_bases']
         for object in objects:
             tile_values = [mine.tile for mine in map.get_tiles_by_type(object)]
