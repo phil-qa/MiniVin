@@ -27,6 +27,34 @@ class PathTestModule(unittest.TestCase):
         self.assertEqual('w', Pathing.convert_tile_transisiton_to_direction(source_tile, '12'))
 
 
+    def test_pathing(self):
+        game_state, amy, bob, cathy = self.set_debug_game_state
+
+        path_cathy_to_bob = Pathing.find_path(cathy.tile, bob.tile, game_state.game_map)
+        self.assertTrue(len(path_cathy_to_bob) > 0, 'The path from cathy to bob is not long enough')
+        self.assertEqual('31', path_cathy_to_bob[0], 'The path from cathy to bob does not start at cathy')
+        self.assertEqual('13', path_cathy_to_bob[-1], 'The path from cathy to bob does not end at bob')
+        translated_path = Pathing.translate_path(path_cathy_to_bob)
+        self.assertEqual('w', translated_path[0])
+        self.assertEqual('s', translated_path[1])
+        self.assertEqual('s', translated_path[2])
+        self.assertEqual('w', translated_path[-1])
+
+    def test_pathing_avoids_obstacles(self):
+        game_state = GameState(debug=True)
+        self.assertIsNotNone(game_state)
+        amy = game_state.players[0]
+        bob = game_state.players[1]
+        cathy = game_state.players[2]
+
+        path_bob_to_amy = Pathing.find_path(bob.tile, amy.tile, game_state.game_map)
+        blocking_objects = [game_object.tile for game_object in game_state.game_map.game_tiles if game_object.passable == False]
+        self.assertIsNotNone(path_bob_to_amy, "there should be a path from bon to amy")
+        any_in_path = [path_item for path_item in path_bob_to_amy if path_item in blocking_objects]
+        self.assertTrue (0 == len(any_in_path), msg=f"There should be no blocking objects but there are {any_in_path}")
+
+
+
     @property
     def set_debug_game_state(self):
         object_array = [GameState(debug=True)]

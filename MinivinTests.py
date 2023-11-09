@@ -152,32 +152,6 @@ class MyTestCase(unittest.TestCase):
 
         self.assertEqual(5, amy.resource, "amys got an odd amount of coins")
 
-    def test_pathing(self):
-        game_state, amy, bob, cathy = self.set_debug_game_state
-
-        path_cathy_to_bob = Pathing.find_path(cathy.name, bob.name, game_state.game_map)
-        self.assertTrue(len(path_cathy_to_bob) > 0, 'The path from cathy to bob is not long enough')
-        self.assertEqual('31', path_cathy_to_bob[0], 'The path from cathy to bob does not start at cathy')
-        self.assertEqual('13', path_cathy_to_bob[-1], 'The path from cathy to bob does not end at bob')
-        translated_path = Pathing.translate_path(path_cathy_to_bob)
-        self.assertEqual('w', translated_path[0])
-        self.assertEqual('s', translated_path[1])
-        self.assertEqual('s', translated_path[2])
-        self.assertEqual('w', translated_path[-1])
-
-    def test_pathing_avoids_obstacles(self):
-        game_state = GameState(debug=True)
-        self.assertIsNotNone(game_state)
-        amy = game_state.players[0]
-        bob = game_state.players[1]
-        cathy = game_state.players[2]
-
-        path_bob_to_amy = Pathing.find_path(bob.name, amy.name, game_state.game_map)
-        blocking_objects = [game_object.name for game_object in game_state.all_game_objects if game_object.passble == False]
-        self.assertIsNotNone(path_bob_to_amy)
-        self.assertIsTrue(0, len([path_item for path_item in path_bob_to_amy if path_item in blocking_objects]))
-
-
 
     #TODO finish up conflict tests
     def test_conflict_states(self):
