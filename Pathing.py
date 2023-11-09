@@ -47,7 +47,7 @@ class Pathing:
     @staticmethod
     def find_path(start, end, map):
         graph = Pathing.build_graph(map)
-        shortest_path = list(nx.shortest_path(Pathing.build_graph(map), start, end))
+        shortest_path = list(nx.shortest_path(graph, start, end))
         if shortest_path[-1] != end:
             shortest_path.append(end)
 

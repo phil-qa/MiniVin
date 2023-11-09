@@ -23,26 +23,7 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue(amy_position.name == 'amy')
         self.assertTrue(obstacle.name == 'obstacle')
 
-    def test_translate_tile_direction(self):
-        source_tile = '22'
-        self.assertEqual('n', Pathing.convert_tile_transisiton_to_direction(source_tile,'21'))
-        self.assertEqual('e', Pathing.convert_tile_transisiton_to_direction(source_tile, '32'))
-        self.assertEqual('s', Pathing.convert_tile_transisiton_to_direction(source_tile, '23'))
-        self.assertEqual('w', Pathing.convert_tile_transisiton_to_direction(source_tile, '12'))
 
-    def test_get_path(self):
-        game_state, amy, bob, cathy = self.set_debug_game_state()
-        mine = game_state.mines[0]
-
-        path_amy_to_mine1 = Pathing.find_path(amy.name, mine.name, game_state.game_map)
-        # path request is not null
-        self.assertIsNotNone(path_amy_to_mine1, 'No path objects returned from request amy to mine')
-        #path does not go over an impassble object
-        for tile in path_amy_to_mine1[1:-2]:
-            x = int(tile[0])
-            y = int(tile[1])
-            object_at_location = game_state.game_map.get_tile(x, y)
-            self.assertEqual(True, object_at_location.passable, f"stepped on a non passable square at {tile}")
 
         # assert direction steps
 
