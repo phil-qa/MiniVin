@@ -58,7 +58,6 @@ class PathTestModule(unittest.TestCase):
         self.assertTrue (len(any_in_path)>0, msg=f"There should be some blocking objects but there are none")
 
 
-
     @property
     def set_debug_game_state(self):
         object_array = [GameState(debug=True)]
