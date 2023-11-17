@@ -35,6 +35,7 @@ class GameState:
         '''
         for player, base in zip(self.players, self.player_bases):
             player.set(base.x_position, base.y_position, 50)
+
             base.player = player.name
             base.name = f'{player.name}_base'
         test = 'stop'
@@ -56,13 +57,11 @@ class GameState:
                 fight_outcomes = {}
                 for fighter in player_set:
                     fight_outcomes.append({fighter, random.randint(1,10)})
-                highest = {fighter for figher in fight_outcomes if fighter[1] == max([value[1] for value in fight_outcomes ])}
+                highest = {fighter for fighter in fight_outcomes if fighter[1] == max([value[1] for value in fight_outcomes ])}
                 all = {p for p in player_set}
                 losers = all - highest
                 for loser in losers:
                     loser.health -= 1
-
-
         # send losers back to their bases
 
         for player in next_state.keys():
@@ -71,9 +70,6 @@ class GameState:
 
         for player in next_state.keys():
             player.move_player(next_state[player])
-
-
-
         print('stop')
 
         '''        for player, activity in activity_frame.items():
@@ -145,11 +141,11 @@ class GameState:
         return conflicts, next_state
 
     def determine_next_state(self, activity_frame):
-        '''
+        """
         determines the next move tile for each player based off the activity frame values
         :param activity_frame: dictionary of the player names and their requested moves
         :return: dictionary of players and their next move tile
-        '''
+        """
         moves = {}
         for player in self.players:
             moves[player] = player.next_tile(activity_frame[player.name])

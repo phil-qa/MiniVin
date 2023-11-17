@@ -1,7 +1,8 @@
 import unittest
-from MapTests import MapTestModule
-from PlayerTests import PlayerTestModule
-from PathTests import PathTestModule
+from tests.MapTests import MapTestModule
+from tests.PlayerTests import PlayerTestModule
+from tests.PathTests import PathTestModule
+from tests.GamestateTests import GameStateModuleTests
 
 def create_test_suite():
     loader = unittest.TestLoader()
@@ -9,6 +10,7 @@ def create_test_suite():
     suite.addTest(loader.loadTestsFromTestCase(MapTestModule))
     suite.addTest(loader.loadTestsFromTestCase(PlayerTestModule))
     suite.addTest(loader.loadTestsFromTestCase(PathTestModule))
+    suite.addTest(loader.loadTestsFromTestCase(GameStateModuleTests))
 
     return suite
 
