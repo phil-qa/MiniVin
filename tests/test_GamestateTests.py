@@ -81,6 +81,20 @@ class GameStateModuleTests(unittest.TestCase):
         game_state.update_state({f'{amy.name}': 's', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
         self.confirm_player_cant_move_over_obstacle(game_state,amy,bob,cathy)
 
+        #test a mine stops movement
+        game_state.update_state({f'{amy.name}': 'w', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
+        game_state.update_state({f'{amy.name}': 's', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
+        self.a_player_cant_move_onto_a_mine(game_state, amy, bob, cathy)
+
+        #test maximum mine is 5 coins
+        game_state.update_state({f'{amy.name}': 's', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
+        game_state.update_state({f'{amy.name}': 's', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
+        game_state.update_state({f'{amy.name}': 's', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
+        game_state.update_state({f'{amy.name}': 's', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
+        game_state.update_state({f'{amy.name}': 's', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
+        self.a_player_can_only_mine_5_coins(game_state,amy, bob, cathy)
+
+
     def initial_state_positions(self, state_data, amy, bob, cathy):
         self.assertEqual([1, 1], amy.coords, "Amy isnt in the right start point")
         self.assertEqual('11', amy.tile, "Tile for amy isnt right")
@@ -115,6 +129,17 @@ class GameStateModuleTests(unittest.TestCase):
         self.assertEqual([2, 1], [amy.x_position, amy.y_position], "Amy tried to move into an obstacle at 2,2 she should not be there")
         self.assertEqual([0, 4], [bob.x_position, bob.y_position], "Bob isnt in the right place")
         self.assertEqual([4, 1], [cathy.x_position, cathy.y_position], "Cathy isnt in the right place")
+
+    def a_player_cant_move_onto_a_mine(self, game_state, amy, bob, cathy):
+        self.assertEqual([1, 1], [amy.x_position, amy.y_position], "Amy isnt in the right place")
+        self.assertEqual('11', amy.tile, "Tile for amy isnt right")
+        self.assertEqual([0, 4], [bob.x_position, bob.y_position], "Bob isnt in the right place")
+        self.assertEqual([4, 1], [cathy.x_position, cathy.y_position], "Cathy isnt in the right place")
+        self.assertEqual(1, amy.resource, "amy  didnt get a coin")
+
+    def a_player_can_only_mine_5_coins(self, game_state, amy, bob, cathy):
+        self.assertEqual(5, amy.resource, "amys got an odd amount of coins")
+
 
     @property
     def set_debug_game_state(self):
