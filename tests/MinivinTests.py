@@ -95,7 +95,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual([2, 1], [amy.x_position, amy.y_position], "Amy tried to move into an obstacle at 2,2 she should not be there")
         self.assertEqual([0, 4], [bob.x_position, bob.y_position], "Bob isnt in the right place")
         self.assertEqual([4, 2], [cathy.x_position, cathy.y_position], "Cathy isnt in the right place")
-
+        #######
         # # player approaching a mine name does not move
 
         game_state.update_state({f'{amy.name}': 'w', f'{bob.name}': 'h', f'{cathy.name}': 'h'})

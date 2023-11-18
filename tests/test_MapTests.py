@@ -18,7 +18,7 @@ class MapTestModule(unittest.TestCase):
         self.assertEqual(len(map.game_tile_map), 4, "The map should be the same size as requested")
         self.assertTrue(all(isinstance(tile,GameTile) for tile in map.game_tile_map[0]), f"The map should consist of game tiles, {type(map.game_tile_map[0][0])}")
         test_array = [symbol.symbol for symbol in map.game_tile_map[0]]
-        self.assertEqual([0, 0, 0, 0], test_array)
+        self.assertEqual(['em', 'em', 'em', 'em'], test_array)
 
     def test_map_objects_initialise(self):
         '''
@@ -131,5 +131,3 @@ def print_map(map : Map):
 
 
 
-if __name__ == '__main__':
-    unittest.main()

@@ -8,11 +8,11 @@ class GameTile:
         self.tile = f'{x_location}{y_location}'
         self.players_on_tile = []
         if type == 'empty':
-            self.symbol = 0
+            self.symbol = 'em'
             self.resource = 0
             self.passable = True
         elif type == 'obstacle':
-            self.symbol = 'o'
+            self.symbol = 'ob'
             self.resource = 0
             self.passable = False
         elif type == 'mine':
@@ -20,10 +20,9 @@ class GameTile:
             self.resource = random.randint(16, 32)
             self.passable = False
         elif type == 'player_base':
-            self.symbol = self.name
             self.resource = 0
             self.passable = False
-            self.symbol = 'b'
+            self.symbol = 'pb'
 
     def update_location(self, x, y):
         self.x_position = x

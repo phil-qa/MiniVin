@@ -18,6 +18,8 @@ class GameState:
         self.players = [Player(pl) for pl in players]
         self.player_bases = [PlayerBase(ba.x_position, ba.y_position) for ba in self.game_map.get_objects('player_base')]
         self.assign_players()
+        # at this point the map is set up
+
         self.mines = [Mine(min.x_position, min.y_position, name = min.name) for min in self.game_map.get_objects('mine')]
         self.obstacles = [Obstacle(ob.x_position, ob.y_position, ob.passable) for ob in self.game_map.get_objects('obstacle')]
         self.all_game_objects =[]
@@ -26,6 +28,7 @@ class GameState:
         self.all_game_objects.extend(self.mines)
         self.all_game_objects.extend(self.player_bases)
         self.all_game_objects.extend(self.obstacles)
+        self._update_player_locations()
         self._update_viz_map()
 
     def assign_players(self):
@@ -38,7 +41,7 @@ class GameState:
 
             base.player = player.name
             base.name = f'{player.name}_base'
-        test = 'stop'
+
 
     def update_state(self, activity_frame):
         current_positions = self.get_positional()
@@ -70,21 +73,7 @@ class GameState:
 
         for player in next_state.keys():
             player.move_player(next_state[player])
-        print('stop')
 
-        '''        for player, activity in activity_frame.items():
-            active_player = [pl for pl in self.players if pl.name == player][0]
-            self.move_target(direction = activity, player = active_player)
-            if active_player.x_position < 0 or active_player.x_position == self.map_size or active_player.y_position <0 or active_player.y_position == self.map_size:
-                self.player_revert(active_player, current_positions)
-
-            if active_player.coords in obstacle_coords:
-                self.player_revert(active_player,current_positions)
-
-            if active_player.coords in mine_coords:
-                if active_player.resource < 5:
-                    active_player.resource += 1
-                self.player_revert(active_player, current_positions)'''
 
     def resolve_next_state(self, activity_frame):
         '''
@@ -100,8 +89,10 @@ class GameState:
         # determine outcomes from interactions with the map objects, get each current_player and where they are going
         for current_player, next_tile in next_state.items():
             # If the proposed move is outside the map bounds the current_player stays the same
+            if '-' in next_tile:
+                next_state[current_player] = current_player.tile
             out_of_bounds_rule = int(next_state[current_player][0]) > self.map_size - 1 or int(next_state[current_player][1]) > self.map_size - 1
-            if '-' in next_tile or out_of_bounds_rule:
+            if out_of_bounds_rule:
                 next_state[current_player] = current_player.tile
 
             #if the next next_tile is in the obstacles then the current_player stops
@@ -177,6 +168,17 @@ class GameState:
         for map_object in self.all_game_objects:
             
             self.viz_map[map_object.y_position][map_object.x_position]=map_object.name
+
+    def _update_player_locations(self):
+        '''
+        update the tile player positions arrays.
+        '''
+        # clear all current player positions
+        for game_tile in self.game_map.game_tiles:
+            game_tile.players_on_tile = []
+        for player in self.players:
+            active_tile = [tile for tile in self.game_map.game_tiles if tile.tile == player.tile][0]
+            active_tile.players_on_tile.append(player.name)
 
 
 

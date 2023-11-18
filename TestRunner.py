@@ -1,17 +1,18 @@
 import unittest
-from tests.MapTests import MapTestModule
-from tests.PlayerTests import PlayerTestModule
-from tests.PathTests import PathTestModule
-from tests.GamestateTests import GameStateModuleTests
+#from tests.test_MapTests import MapTestModule
+#from tests.test_PlayerTests import PlayerTestModule
+#from tests.test_PathTests import PathTestModule
+#from tests.test_GamestateTests import GameStateModuleTests
 
 def create_test_suite():
     loader = unittest.TestLoader()
-    suite = unittest.TestSuite()
+    suite = loader.discover('./tests', pattern='test_*.py')
+    '''
     suite.addTest(loader.loadTestsFromTestCase(MapTestModule))
     suite.addTest(loader.loadTestsFromTestCase(PlayerTestModule))
     suite.addTest(loader.loadTestsFromTestCase(PathTestModule))
     suite.addTest(loader.loadTestsFromTestCase(GameStateModuleTests))
-
+    '''
     return suite
 
 if __name__ == '__main__':
