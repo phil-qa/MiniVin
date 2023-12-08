@@ -73,6 +73,7 @@ class GameState:
 
         for player in next_state.keys():
             player.move_player(next_state[player])
+        self._update_visual_map(self.players,True)
 
 
     def resolve_next_state(self, activity_frame):
@@ -113,10 +114,10 @@ class GameState:
                     next_state[current_player] = current_player.tile
 
         # after all the future states have been determined, run a conflict check
-        distinct_values = set(next_state.values())
-        if len(distinct_values) < len(activity_frame):
-            players_matching = [[player.key for player in next_state.items() if player.value == active_tile] for active_tile in distinct_values]
-            for conflict_set in players_matching:
+        distinct_values = set(next_state.values()) #distinct values derives from the tiles that the players are moving to or in
+        if len(distinct_values) < len(activity_frame): #if the distinct values in the next stte is less than the number of players then there is a conflict
+            players_jn_conflict = [[player for player, tile in next_state.items() if player.tile == active_tile] for active_tile in distinct_values]
+            for conflict_set in players_jn_conflict:
                 while len([player_with_health for player_with_health in conflict_set if player_with_health.health > 1 ]) >1 :
                     conflict_set = self.resolve_conflict(conflict_set)
 
@@ -181,7 +182,23 @@ class GameState:
             active_tile.players_on_tile.append(player.name)
 
 
-
+    def _update_visual_map(self, players, debug):
+        self.visual_map = ''
+        map_size = self.game_map.size
+        for row in range(map_size):
+            build = ''
+            for column in range(map_size):
+                object_name = self.game_map.game_tile_map[column][row].symbol
+                build += object_name
+                players_on_tile = [p for p in players if p.tile == f"{column}{row}"]
+                if len(players_on_tile) > 0:
+                    build = ''
+                    for p in players_on_tile:
+                        build += p.symbol
+                build+="\t"
+            self.visual_map+=build
+            if debug:
+                print (build)
 
 
 

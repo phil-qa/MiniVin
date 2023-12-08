@@ -22,7 +22,7 @@ class GameTile:
         elif type == 'player_base':
             self.resource = 0
             self.passable = False
-            self.symbol = 'pb'
+            self.symbol = 'ba'
 
     def update_location(self, x, y):
         self.x_position = x

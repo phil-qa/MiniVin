@@ -94,6 +94,16 @@ class GameStateModuleTests(unittest.TestCase):
         game_state.update_state({f'{amy.name}': 's', f'{bob.name}': 'h', f'{cathy.name}': 'h'})
         self.a_player_can_only_mine_5_coins(game_state,amy, bob, cathy)
 
+        #test conflicts
+        # a player assaulting another has an advantage
+        # move bob 0,4 to amy 1,1 - update amy needs to move because shes in her base
+        original_gamestate = game_state
+        game_state.update_state({f'{amy.name}': 'w', f'{bob.name}': 'n', f'{cathy.name}': 'n'}) # bob to 0 3 cathy to 0 0 amy to 0 1
+        game_state.update_state({f'{amy.name}': 'h', f'{bob.name}': 'n', f'{cathy.name}': 'h'})  # bob to 0 2
+        game_state.update_state({f'{amy.name}': 'h', f'{bob.name}': 'n', f'{cathy.name}': 'h'})  # bob to 0 1 attacks amy
+        self.a_player_conflict_resolves(original_gamestate, game_state)
+
+
 
     def initial_state_positions(self, state_data, amy, bob, cathy):
         self.assertEqual([1, 1], amy.coords, "Amy isnt in the right start point")
@@ -140,6 +150,16 @@ class GameStateModuleTests(unittest.TestCase):
     def a_player_can_only_mine_5_coins(self, game_state, amy, bob, cathy):
         self.assertEqual(5, amy.resource, "amys got an odd amount of coins")
 
+    #conflicts
+    def a_player_conflict_resolves(self, original_game_state, new_gamestate):
+        original_players = original_game_state.players
+        new_players = new_gamestate.players
+        original_amy = self.get_player('amy',original_players)
+        new_amy = self.get_player('amy', new_players)
+        original_bob = self.get_player('bob', original_players)
+        new_bob = self.get_player('bob', new_players)
+        self.assertNotEqual(original_amy.health, new_amy.health)
+
 
     @property
     def set_debug_game_state(self):
@@ -154,3 +174,6 @@ class GameStateModuleTests(unittest.TestCase):
         cathy = object_array[3]
         return game_state, amy, bob, cathy
 
+
+    def get_player(self, name, player_array):
+        return [player for player in player_array if player.name == name][0]

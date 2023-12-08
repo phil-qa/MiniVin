@@ -65,7 +65,7 @@ class Map:
         for column in range(self.size):
             for row in range(self.size):
                 self.game_tiles.append(self.game_tile_map[column][row])
-        self.update_visual_map(players, debug)
+
 
     def get_objects(self, object_type):
         found_objects = []
@@ -109,16 +109,7 @@ class Map:
                     break
 
 
-    def update_visual_map(self, players, debug):
-        self.visual_map = ''
-        for row in range(self.size):
-            build = ''
-            for column in range(self.size):
-                object_name = self.game_tile_map[column][row].symbol
-                build += object_name+"\t"
-            self.visual_map+=build
-            if debug:
-                print (build)
+
 
 
 

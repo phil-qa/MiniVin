@@ -16,6 +16,7 @@ class Player:
         self.tile = None
         self.previous_tile = None
         self.returning = False
+        self.symbol = 'p'+identifier[0]
         self.passable = True # this allows other players to collide
 
     def set(self,x_pos, y_pos, health):
