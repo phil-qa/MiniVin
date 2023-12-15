@@ -158,7 +158,8 @@ class GameStateModuleTests(unittest.TestCase):
         new_amy = self.get_player('amy', new_players)
         original_bob = self.get_player('bob', original_players)
         new_bob = self.get_player('bob', new_players)
-        self.assertNotEqual(original_amy.health, new_amy.health)
+        self.assertNotEqual(original_amy.health, new_amy.health, f"amies health remains the same as {original_amy.health}")
+        self.assertEqual(new_amy.health, 1, f"amys health is too high she should be 1 is {new_amy.health}")
 
 
     @property

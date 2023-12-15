@@ -53,18 +53,9 @@ class GameState:
 
         #resolve conflicts
         #players in fight
-        conflict_tiles = set(conflicts.values())
-        for conflict_tile in conflict_tiles:
-            player_set = [p.key for p in conflicts if p.value == conflict_tile ]
-            while any(p.health != 1 for p in player_set):
-                fight_outcomes = {}
-                for fighter in player_set:
-                    fight_outcomes.append({fighter, random.randint(1,10)})
-                highest = {fighter for fighter in fight_outcomes if fighter[1] == max([value[1] for value in fight_outcomes ])}
-                all = {p for p in player_set}
-                losers = all - highest
-                for loser in losers:
-                    loser.health -= 1
+
+        for conflict_players in conflicts:
+            self.resolve_conflict(conflicts)
         # send losers back to their bases
 
         for player in next_state.keys():
@@ -114,22 +105,11 @@ class GameState:
                     next_state[current_player] = current_player.tile
 
         # after all the future states have been determined, run a conflict check
+        conflicts = []
         distinct_values = set(next_state.values()) #distinct values derives from the tiles that the players are moving to or in
         if len(distinct_values) < len(activity_frame): #if the distinct values in the next stte is less than the number of players then there is a conflict
             players_jn_conflict = [[player for player, tile in next_state.items() if player.tile == active_tile] for active_tile in distinct_values]
-            for conflict_set in players_jn_conflict:
-                while len([player_with_health for player_with_health in conflict_set if player_with_health.health > 1 ]) >1 :
-                    conflict_set = self.resolve_conflict(conflict_set)
-
-
-
-        for other_player, target_tile in next_state.items(): # is there a collision with the other current_player then conflict
-            if other_player != current_player:
-                if next_tile == target_tile:
-                    if current_player not in conflicts.keys():
-                        conflicts[current_player] = next_tile
-                    if other_player not in conflicts.keys():
-                        conflicts[other_player] = target_tile
+            conflicts.append(players_jn_conflict)
         return conflicts, next_state
 
     def determine_next_state(self, activity_frame):
@@ -156,7 +136,12 @@ class GameState:
     def move_target(self, direction, player):
         player.move_player(direction)
 
-    def resolve_conflict(self,players):
+    def resolve_conflict(self, players):
+        while all([p>1 for p in players.health ]):
+            self.resolve_conflict_action(players)
+        return players
+
+    def resolve_conflict_action(self,players):
         fighters = [player for player in players if player.health > 1]
         random_fight_values = [random.randint(1,100) for fighter in fighters]
         winner = players[max( (v, i) for i, v in enumerate(random_fight_values) )[1]]
