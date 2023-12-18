@@ -53,9 +53,8 @@ class GameState:
 
         #resolve conflicts
         #players in fight
-
-        for conflict_players in conflicts:
-            self.resolve_conflict(conflicts)
+        for conflict in conflicts:
+            self.resolve_conflict(conflict)
         # send losers back to their bases
 
         for player in next_state.keys():
@@ -108,8 +107,10 @@ class GameState:
         conflicts = []
         distinct_values = set(next_state.values()) #distinct values derives from the tiles that the players are moving to or in
         if len(distinct_values) < len(activity_frame): #if the distinct values in the next stte is less than the number of players then there is a conflict
-            players_jn_conflict = [[player for player, tile in next_state.items() if player.tile == active_tile] for active_tile in distinct_values]
-            conflicts.append(players_jn_conflict)
+            for active_tile in distinct_values:
+                players_jn_conflict = [player for player, tile in next_state.items() if tile == active_tile]
+                if len(players_jn_conflict) > 1: #if there are more than one player vying nfor the same tile then add it to the conflicts to be returned
+                    conflicts.append(players_jn_conflict)
         return conflicts, next_state
 
     def determine_next_state(self, activity_frame):
@@ -137,7 +138,7 @@ class GameState:
         player.move_player(direction)
 
     def resolve_conflict(self, players):
-        while all([p>1 for p in players.health ]):
+        while all([p.health>1 for p in players ]):
             self.resolve_conflict_action(players)
         return players
 
